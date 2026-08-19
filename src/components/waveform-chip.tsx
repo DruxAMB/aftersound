@@ -47,7 +47,7 @@ export default function WaveformChip({ buffer, sampleRate, label, className }: P
 
   return (
     <div
-      className={`inline-flex items-center gap-3 rounded-cards border border-graphite bg-midnight-surface px-5 py-3 ${className ?? ""}`}
+      className={`inline-flex items-center gap-3 rounded-cards border border-paper-white/[0.06] bg-midnight-surface px-5 py-3 ${className ?? ""}`}
     >
       <svg width="200" height="40" viewBox="0 0 200 40">
         <path
@@ -58,7 +58,7 @@ export default function WaveformChip({ buffer, sampleRate, label, className }: P
           fill="none"
         />
       </svg>
-      <span className="ui-mono text-caption caption-tracking text-steel-gray">{label}</span>
+      <span className="ui-mono text-[12px] text-paper-white/50">{label}</span>
     </div>
   );
 }

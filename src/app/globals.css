@@ -1,21 +1,22 @@
 @import "tailwindcss";
 
 @theme {
-  /* Colors — Monologue token system */
+  /* Colors — Monologue actual computed values from monologue.to */
   --color-electric-cyan: #19d0e8;
   --color-sky-signal: #44ccff;
   --color-deep-teal: #062f34;
-  --color-void-black: #000000;
-  --color-obsidian: #010101;
+  --color-void-black: #121212;
   --color-midnight-surface: #191919;
   --color-graphite: #282828;
   --color-charcoal: #363636;
   --color-slate: #3f3f3f;
   --color-steel-gray: #7f7f7f;
-  --color-paper-white: #ffffff;
+  --color-paper-white: #f2f0ed;
+  --color-button-white: #fefdfb;
+  --color-button-border: #f2eee5;
   --color-ghost-gray: #c0c0c0;
 
-  /* Typography — Font Families */
+  /* Typography */
   --font-instrument-serif: "Instrument Serif", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --font-dm-mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --font-geist: "Geist", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -27,39 +28,19 @@
   --text-heading-sm: 32px;
   --text-heading: 48px;
   --text-heading-lg: 72px;
-  --text-display: 96px;
+  --text-display: 92px;
 
-  /* Spacing */
-  --spacing-5: 5px;
-  --spacing-6: 6px;
-  --spacing-8: 8px;
-  --spacing-10: 10px;
-  --spacing-12: 12px;
-  --spacing-16: 16px;
-  --spacing-20: 20px;
-  --spacing-24: 24px;
-  --spacing-32: 32px;
-  --spacing-40: 40px;
-  --spacing-72: 72px;
-
-  /* Border Radius */
-  --radius-tags: 100000px;
+  /* Border Radius — from actual site */
+  --radius-buttons: 9px;
   --radius-cards: 18px;
-  --radius-large: 12px;
-  --radius-small: 4px;
   --radius-medium: 8px;
-  --radius-buttons: 100000px;
-
-  /* Shadows */
-  --shadow-subtle: rgba(0, 0, 0, 0.7) 3px 3px 2px 0px inset, rgba(255, 255, 255, 0.25) 3px 2px 2px 0px;
-  --shadow-sm: rgba(0, 0, 0, 0.25) 0px 4px 4px 0px, rgba(255, 255, 255, 0.25) 1px 1px 2px 0px, rgba(0, 0, 0, 0.5) 1px 1px 1px 0px inset, rgba(0, 0, 0, 0.7) 2px 2px 12px 0px inset;
-  --shadow-subtle-2: rgba(0, 0, 0, 0.63) 0px 0px 0px 1px;
-  --shadow-md: rgb(14, 93, 102) 6px 6px 10px 0px inset, rgba(255, 255, 255, 0.2) 4px 4px 4px 0px, rgba(255, 255, 255, 0.25) 1px 1px 2px 0px;
+  --radius-small: 4px;
+  --radius-large: 12px;
 }
 
 :root {
-  --background: #000000;
-  --foreground: #ffffff;
+  --background: #121212;
+  --foreground: #f2f0ed;
 }
 
 body {
@@ -69,7 +50,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Honor prefers-reduced-motion: disable all CSS transitions and animations */
+/* Honor prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -81,17 +62,148 @@ body {
   }
 }
 
-/* Landing page — slow breathing glow */
+/* Primary button — matches monologue.to exactly */
+.btn-primary {
+  font-family: var(--font-dm-mono), monospace;
+  font-size: 14px;
+  background-color: #fefdfb;
+  color: #282828;
+  border: 1px solid #f2eee5;
+  border-radius: 9px;
+  padding: 0 14px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow:
+    rgba(255, 255, 255, 0.8) 0px 1px 0px 0px inset,
+    rgba(0, 0, 0, 0.48) 0px 2px 4px 0px,
+    rgba(0, 0, 0, 0.18) 0px 8px 18px 0px;
+  transition:
+    background-position 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.18s,
+    box-shadow 0.18s,
+    transform 0.18s;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    rgba(255, 255, 255, 0.8) 0px 1px 0px 0px inset,
+    rgba(0, 0, 0, 0.48) 0px 4px 8px 0px,
+    rgba(0, 0, 0, 0.22) 0px 12px 24px 0px;
+}
+
+.btn-primary:active {
+  transform: translateY(0px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Secondary button — matches monologue.to secondary */
+.btn-secondary {
+  font-family: var(--font-dm-mono), monospace;
+  font-size: 14px;
+  background-color: transparent;
+  color: rgba(242, 240, 237, 0.82);
+  border: 1px solid rgba(242, 240, 237, 0.1);
+  border-radius: 9px;
+  padding: 0 14px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow:
+    rgba(242, 240, 237, 0.1) 0px 1px 0px 0px inset,
+    rgba(0, 0, 0, 0.48) 0px 2px 4px 0px;
+  transition:
+    border-color 0.18s,
+    box-shadow 0.18s,
+    transform 0.18s,
+    color 0.18s;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  border-color: rgba(242, 240, 237, 0.2);
+  color: #f2f0ed;
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active {
+  transform: translateY(0px);
+}
+
+/* Ghost wordmark — Instrument Serif at massive scale */
+.ghost-wordmark {
+  font-family: var(--font-instrument-serif);
+  font-weight: 400;
+  color: #c0c0c0;
+  opacity: 0.06;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Editorial heading — Instrument Serif (normal, not italic, per actual site) */
+.heading-serif {
+  font-family: var(--font-instrument-serif);
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: -0.03em;
+  line-height: 0.78;
+}
+
+/* Italic serif — for accents and sub-headings */
+.heading-serif-italic {
+  font-family: var(--font-instrument-serif);
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+/* UI chrome — DM Mono */
+.ui-mono {
+  font-family: var(--font-dm-mono), monospace;
+  font-weight: 400;
+}
+
+/* Caption tracking */
+.caption-tracking {
+  letter-spacing: 0.021em;
+}
+
+/* Animated EQ bars — decorative sound wave at bottom of hero */
+@keyframes eq-bar {
+  0%, 100% { height: 8%; }
+  50% { height: 70%; }
+}
+
+.animate-eq-bar {
+  animation: eq-bar 1.5s ease-in-out infinite;
+}
+
+/* Slow breathing glow */
 @keyframes pulse-slow {
-  0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
-  50% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.05); }
+  0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.08); }
 }
 
 .animate-pulse-slow {
-  animation: pulse-slow 4s ease-in-out infinite;
+  animation: pulse-slow 5s ease-in-out infinite;
 }
 
-/* Range slider styling — cyan thumb on dark track */
+/* Range slider — cyan thumb on dark track */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
@@ -101,7 +213,7 @@ input[type="range"] {
 input[type="range"]::-webkit-slider-runnable-track {
   height: 2px;
   background: #282828;
-  border-radius: 100000px;
+  border-radius: 9px;
 }
 
 input[type="range"]::-webkit-slider-thumb {
@@ -119,7 +231,7 @@ input[type="range"]::-webkit-slider-thumb {
 input[type="range"]::-moz-range-track {
   height: 2px;
   background: #282828;
-  border-radius: 100000px;
+  border-radius: 9px;
 }
 
 input[type="range"]::-moz-range-thumb {
@@ -130,38 +242,4 @@ input[type="range"]::-moz-range-thumb {
   cursor: pointer;
   border: none;
   box-shadow: 0 0 8px rgba(25, 208, 232, 0.4);
-}
-
-/* Ghost wordmark — Instrument Serif italic at massive scale */
-.ghost-wordmark {
-  font-family: var(--font-instrument-serif);
-  font-style: italic;
-  font-weight: 400;
-  color: #c0c0c0;
-  opacity: 0.08;
-  letter-spacing: -0.04em;
-  line-height: 1;
-  user-select: none;
-  pointer-events: none;
-  white-space: nowrap;
-}
-
-/* Editorial heading — Instrument Serif italic */
-.heading-serif {
-  font-family: var(--font-instrument-serif);
-  font-style: italic;
-  font-weight: 400;
-  letter-spacing: -0.04em;
-  line-height: 1.05;
-}
-
-/* UI chrome — DM Mono */
-.ui-mono {
-  font-family: var(--font-dm-mono);
-  font-weight: 400;
-}
-
-/* Caption tracking */
-.caption-tracking {
-  letter-spacing: 0.021em;
 }

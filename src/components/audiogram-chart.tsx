@@ -116,7 +116,7 @@ export default function AudiogramChart({ audiogram, className }: Props) {
             y1={yScale(db)}
             x2={width - padding.right}
             y2={yScale(db)}
-            stroke="#282828"
+            stroke="rgba(242,240,237,0.06)"
             strokeWidth="1"
           />
         ))}
@@ -127,7 +127,7 @@ export default function AudiogramChart({ audiogram, className }: Props) {
             y1={padding.top}
             x2={xScale(freq)}
             y2={height - padding.bottom}
-            stroke="#1f1f1f"
+            stroke="rgba(242,240,237,0.04)"
             strokeWidth="1"
           />
         ))}
@@ -139,7 +139,8 @@ export default function AudiogramChart({ audiogram, className }: Props) {
             x={padding.left - 8}
             y={yScale(db) + 4}
             textAnchor="end"
-            className="fill-[#7f7f7f] text-[10px]"
+            className="text-[10px]"
+            fill="rgba(242,240,237,0.3)"
             style={{ fontFamily: "var(--font-dm-mono), monospace" }}
           >
             {db}
@@ -149,7 +150,8 @@ export default function AudiogramChart({ audiogram, className }: Props) {
           x={8}
           y={height / 2}
           textAnchor="middle"
-          className="fill-[#7f7f7f] text-[9px]"
+          className="text-[9px]"
+          fill="rgba(242,240,237,0.3)"
           style={{ fontFamily: "var(--font-dm-mono), monospace" }}
           transform={`rotate(-90 8 ${height / 2})`}
         >
@@ -163,7 +165,8 @@ export default function AudiogramChart({ audiogram, className }: Props) {
             x={xScale(freq)}
             y={height - padding.bottom + 16}
             textAnchor="middle"
-            className="fill-[#7f7f7f] text-[10px]"
+            className="text-[10px]"
+            fill="rgba(242,240,237,0.3)"
             style={{ fontFamily: "var(--font-dm-mono), monospace" }}
           >
             {freq >= 1000 ? `${freq / 1000}k` : freq}
@@ -176,7 +179,7 @@ export default function AudiogramChart({ audiogram, className }: Props) {
           y1={yScale(0)}
           x2={width - padding.right}
           y2={yScale(0)}
-          stroke="#363636"
+          stroke="rgba(242,240,237,0.15)"
           strokeWidth="1"
           strokeDasharray="4 4"
         />
