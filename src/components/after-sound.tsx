@@ -1,24 +1,138 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
+import { SoundLevelMeter, type LevelData } from "@/lib/audio/meter";
+import { allowedTime, formatDuration } from "@/lib/audio/niosh";
+import { createScene, type SceneId } from "@/lib/audio/scenes";
+import SpectrumVisualizer from "@/components/spectrum-visualizer";
 
 gsap.registerPlugin(useGSAP);
 
 type Phase = "landing" | "listening" | "captured" | "revealed" | "testing";
 
-const SCENES = [
+const SCENES: { id: SceneId; label: string }[] = [
   { id: "subway", label: "Subway" },
   { id: "cafe", label: "Café" },
   { id: "gym", label: "Gym" },
-] as const;
+];
 
 export default function AfterSound() {
   const [phase, setPhase] = useState<Phase>("landing");
   const [error, setError] = useState<string | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [laeq, setLaeq] = useState<number | null>(null);
+  const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
+  const [activeScene, setActiveScene] = useState<SceneId | null>(null);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const meterRef = useRef<SoundLevelMeter | null>(null);
+  const sceneStopRef = useRef<(() => void) | null>(null);
+  const sceneCtxRef = useRef<AudioContext | null>(null);
+  const latestLevelRef = useRef<LevelData | null>(null);
+  const rafRef = useRef<number | null>(null);
+
+  // Throttled state updates from AudioWorklet (60fps max)
+  useEffect(() => {
+    if (phase !== "listening") return;
+    const tick = () => {
+      const data = latestLevelRef.current;
+      if (data && isFinite(data.laeq)) {
+        setLaeq(data.laeq);
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [phase]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stopMeter();
+    };
+  }, []);
+
+  const stopMeter = useCallback(() => {
+    if (meterRef.current) {
+      meterRef.current.stop();
+      meterRef.current = null;
+    }
+    if (sceneStopRef.current) {
+      sceneStopRef.current();
+      sceneStopRef.current = null;
+    }
+    if (sceneCtxRef.current) {
+      sceneCtxRef.current.close().catch(() => {});
+      sceneCtxRef.current = null;
+    }
+    setAnalyser(null);
+    setLaeq(null);
+    setActiveScene(null);
+  }, []);
+
+  const startMeter = useCallback(
+    async (stream: MediaStream, ctx?: AudioContext) => {
+      const meter = new SoundLevelMeter({
+        onLevel: (data) => {
+          latestLevelRef.current = data;
+        },
+      });
+      meterRef.current = meter;
+      await meter.startFromStream(stream, ctx);
+      setAnalyser(meter.getAnalyser());
+      setPhase("listening");
+    },
+    [],
+  );
+
+  const handleListen = useCallback(async () => {
+    setError(null);
+    stopMeter();
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: false,
+      });
+      await startMeter(stream);
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "NotAllowedError") {
+        setError("Microphone access denied. Try a sample scene below.");
+      } else {
+        setError("Could not access microphone. Try a sample scene below.");
+      }
+    }
+  }, [startMeter, stopMeter]);
+
+  const handleScene = useCallback(
+    async (sceneId: SceneId) => {
+      setError(null);
+      stopMeter();
+      try {
+        const ctx = new AudioContext();
+        sceneCtxRef.current = ctx;
+        if (ctx.state === "suspended") {
+          await ctx.resume();
+        }
+        const { stream, stop } = createScene(sceneId, ctx);
+        sceneStopRef.current = stop;
+        setActiveScene(sceneId);
+        await startMeter(stream, ctx);
+      } catch {
+        setError("Could not start scene audio.");
+      }
+    },
+    [startMeter, stopMeter],
+  );
+
+  const handleStop = useCallback(() => {
+    stopMeter();
+    setPhase("landing");
+  }, [stopMeter]);
+
+  // GSAP entrance animation for landing
   useGSAP(
     () => {
       if (phase !== "landing") return;
@@ -30,28 +144,6 @@ export default function AfterSound() {
     },
     { scope: containerRef, dependencies: [phase] },
   );
-
-  const handleListen = useCallback(async () => {
-    setError(null);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-      // For now, just transition to listening phase.
-      // Step 2 will wire up the full meter UI.
-      stream.getTracks().forEach((t) => t.stop());
-      setPhase("listening");
-    } catch (err) {
-      if (err instanceof DOMException && err.name === "NotAllowedError") {
-        setError("Microphone access denied. Try a sample scene below.");
-      } else {
-        setError("Could not access microphone. Try a sample scene below.");
-      }
-    }
-  }, []);
-
-  const handleScene = useCallback(async (_sceneId: string) => {
-    // Step 2 will wire up bundled scene playback.
-    setPhase("listening");
-  }, []);
 
   if (phase === "landing") {
     return (
@@ -111,12 +203,82 @@ export default function AfterSound() {
     );
   }
 
-  // Placeholder for subsequent phases — will be built in steps 2–7
+  if (phase === "listening") {
+    const safeTime = laeq != null ? allowedTime(laeq) : null;
+    return (
+      <div className="flex min-h-dvh flex-col bg-black px-6 py-8">
+        <header className="flex items-center justify-between">
+          <span className="text-sm font-medium text-zinc-500">
+            {activeScene ? `${SCENES.find((s) => s.id === activeScene)?.label} scene` : "Your room"}
+          </span>
+          <button
+            onClick={handleStop}
+            className="h-9 rounded-full border border-white/15 px-4 text-sm text-zinc-400 transition-all hover:border-white/30 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            Stop
+          </button>
+        </header>
+
+        <main className="flex flex-1 flex-col items-center justify-center gap-8">
+          {/* Live dB readout */}
+          <div className="flex flex-col items-center">
+            <div className="text-7xl font-semibold tabular-nums text-white sm:text-8xl">
+              {laeq != null && isFinite(laeq) ? Math.round(laeq) : "—"}
+            </div>
+            <div className="mt-1 text-sm font-medium uppercase tracking-widest text-zinc-500">
+              dBA
+            </div>
+          </div>
+
+          {/* Spectrum visualization */}
+          <SpectrumVisualizer
+            analyser={analyser}
+            className="w-full max-w-2xl"
+          />
+
+          {/* NIOSH safe daily dose */}
+          <div className="flex flex-col items-center gap-1">
+            <p className="text-sm text-zinc-500">
+              At this level, your safe daily exposure is
+            </p>
+            <p className="text-2xl font-medium text-white">
+              {safeTime != null ? formatDuration(safeTime) : "—"}
+            </p>
+            <p className="text-xs text-zinc-600">
+              NIOSH REL · 85 dBA · 3 dB exchange rate
+            </p>
+          </div>
+
+          {/* Scene switcher (visible when in a scene or as fallback) */}
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-xs text-zinc-600">Switch scene</p>
+            <div className="flex gap-2">
+              {SCENES.map((scene) => (
+                <button
+                  key={scene.id}
+                  onClick={() => handleScene(scene.id)}
+                  className={`h-8 rounded-full px-4 text-xs transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${
+                    activeScene === scene.id
+                      ? "bg-white text-black"
+                      : "border border-white/15 text-zinc-400 hover:border-white/30 hover:text-white"
+                  }`}
+                >
+                  {scene.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Placeholder for subsequent phases — will be built in steps 3–7
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-black px-6 text-center text-white">
       <p className="text-zinc-400">Building…</p>
       <button
-        onClick={() => setPhase("landing")}
+        onClick={handleStop}
         className="mt-6 h-10 rounded-full border border-white/15 px-5 text-sm text-zinc-300 transition-all hover:border-white/30 hover:text-white"
       >
         Back

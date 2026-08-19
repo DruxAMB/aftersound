@@ -28,6 +28,7 @@ const FILTER_Q = 0.5;
 
 export class SoundLevelMeter {
   private audioCtx: AudioContext | null = null;
+  private ownsAudioCtx = false;
   private source: AudioNode | null = null;
   private biquads: BiquadFilterNode[] = [];
   private analyser: AnalyserNode | null = null;
@@ -41,14 +42,16 @@ export class SoundLevelMeter {
   }
 
   /**
-   * Start the meter from a MediaStream (microphone).
+   * Start the meter from a MediaStream (microphone or scene generator).
+   * If externalCtx is provided, uses it instead of creating a new one.
    */
-  async startFromStream(stream: MediaStream): Promise<void> {
+  async startFromStream(stream: MediaStream, externalCtx?: AudioContext): Promise<void> {
     this.cleanup();
     this.stream = stream;
 
-    const audioCtx = new AudioContext();
+    const audioCtx = externalCtx ?? new AudioContext();
     this.audioCtx = audioCtx;
+    this.ownsAudioCtx = !externalCtx;
 
     // Load the SPL meter AudioWorklet
     await audioCtx.audioWorklet.addModule("/worklets/spl-meter-processor.js");
@@ -200,10 +203,11 @@ export class SoundLevelMeter {
       this.source.disconnect();
       this.source = null;
     }
-    if (this.audioCtx) {
+    if (this.audioCtx && this.ownsAudioCtx) {
       this.audioCtx.close();
-      this.audioCtx = null;
     }
+    this.audioCtx = null;
+    this.ownsAudioCtx = false;
     this.running = false;
   }
 
