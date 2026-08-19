@@ -1,36 +1,29 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AfterSound
 
-## Getting Started
+> You can't hear the damage happening. Now you can.
 
-First, run the development server:
+AfterSound measures the noise around you, projects your hearing forward using
+NIOSH criteria, and replays five seconds of your own audio through your
+projected future ears — so the damage is audible before it's irreversible.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Status
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+ scaffold — not yet functional. See `HACKATHON_BRIEF.md` for the full spec.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Next.js 16 (App Router) + TypeScript
+- Tailwind CSS v4
+- audiomotion-analyzer (real-time spectrum visualization)
+- GSAP (animation)
+- Web Audio API (AudioWorklet, AnalyserNode, biquad filters)
 
-## Learn More
+## License
 
-To learn more about Next.js, take a look at the following resources:
+GNU AGPL-3.0-or-later. See [LICENSE](./LICENSE).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Acknowledgements
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [audiomotion-analyzer](https://github.com/hvianna/audiomotion-analyzer) by
+  hvianna — AGPL-3.0
+- NIOSH criteria document DHHS 98-126 — public domain
