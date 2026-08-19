@@ -116,6 +116,13 @@ export class ResynthesisEngine {
   }
 
   /**
+   * Get the AudioContext (for ear test tone generation).
+   */
+  getAudioContext(): AudioContext {
+    return this.audioCtx;
+  }
+
+  /**
    * Stop current playback.
    */
   stop() {

@@ -11,6 +11,7 @@ import { ResynthesisEngine, type PlaybackMode } from "@/lib/audio/resynthesis";
 import SpectrumVisualizer from "@/components/spectrum-visualizer";
 import WaveformChip from "@/components/waveform-chip";
 import AudiogramChart from "@/components/audiogram-chart";
+import EarTest from "@/components/ear-test";
 
 gsap.registerPlugin(useGSAP);
 
@@ -38,6 +39,7 @@ export default function AfterSound() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [age, setAge] = useState(DEFAULT_AGE);
   const [dailyExposure, setDailyExposure] = useState(DEFAULT_DAILY_EXPOSURE);
+  const [earTestResults, setEarTestResults] = useState<{ frequency: number; threshold: number | null }[]>([]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const meterRef = useRef<SoundLevelMeter | null>(null);
@@ -213,6 +215,45 @@ export default function AfterSound() {
     },
     [],
   );
+
+  const handleStartEarTest = useCallback(() => {
+    // Stop any playback
+    if (resynthesisRef.current) {
+      resynthesisRef.current.stop();
+    }
+    setIsPlaying(false);
+    setPhase("testing");
+  }, []);
+
+  const handleEarTestComplete = useCallback(
+    (results: { frequency: number; threshold: number | null }[]) => {
+      setEarTestResults(results);
+      // Update audiogram with measured thresholds overlaid on projected
+      if (audiogram) {
+        const updatedAudiogram = audiogram.map((point) => {
+          const measured = results.find((r) => r.frequency === point.frequency);
+          if (measured && measured.threshold != null) {
+            // Use measured threshold if higher than projected (existing loss)
+            return {
+              ...point,
+              thresholdShift: Math.max(point.thresholdShift, measured.threshold),
+            };
+          }
+          return point;
+        });
+        setAudiogram(updatedAudiogram);
+        if (resynthesisRef.current) {
+          resynthesisRef.current.setAudiogram(updatedAudiogram);
+        }
+      }
+      setPhase("revealed");
+    },
+    [audiogram],
+  );
+
+  const handleEarTestBack = useCallback(() => {
+    setPhase("revealed");
+  }, []);
 
   // GSAP entrance animation for landing
   useGSAP(
@@ -464,12 +505,39 @@ export default function AfterSound() {
               />
             </div>
           </div>
+
+          {/* Ear test CTA */}
+          <div className="flex flex-col items-center gap-2 border-t border-white/10 pt-6">
+            {earTestResults.length > 0 && (
+              <p className="text-xs text-green-400/80">
+                ✓ Measured thresholds applied to your projection
+              </p>
+            )}
+            <button
+              onClick={handleStartEarTest}
+              className="h-11 rounded-full border border-white/15 px-6 text-sm font-medium text-zinc-300 transition-all hover:border-white/30 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:scale-[0.98]"
+            >
+              {earTestResults.length > 0 ? "Retest your actual hearing" : "Test your actual hearing"}
+            </button>
+            <p className="text-xs text-zinc-600">90 seconds · headphones recommended</p>
+          </div>
         </main>
       </div>
     );
   }
 
-  // Placeholder for subsequent phases — will be built in steps 6–7
+  if (phase === "testing") {
+    const audioCtx = resynthesisRef.current?.getAudioContext?.() ?? sceneCtxRef.current;
+    return (
+      <EarTest
+        audioCtx={audioCtx ?? null}
+        onComplete={handleEarTestComplete}
+        onBack={handleEarTestBack}
+      />
+    );
+  }
+
+  // Placeholder for step 7 — will be built next
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-black px-6 text-center text-white">
       <p className="text-zinc-400">Building…</p>
