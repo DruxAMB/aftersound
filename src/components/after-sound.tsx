@@ -12,6 +12,7 @@ import SpectrumVisualizer from "@/components/spectrum-visualizer";
 import WaveformChip from "@/components/waveform-chip";
 import AudiogramChart from "@/components/audiogram-chart";
 import EarTest from "@/components/ear-test";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 
 gsap.registerPlugin(useGSAP);
 
@@ -40,6 +41,9 @@ export default function AfterSound() {
   const [age, setAge] = useState(DEFAULT_AGE);
   const [dailyExposure, setDailyExposure] = useState(DEFAULT_DAILY_EXPOSURE);
   const [earTestResults, setEarTestResults] = useState<{ frequency: number; threshold: number | null }[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [playbackError, setPlaybackError] = useState<string | null>(null);
+  const reducedMotion = useReducedMotion();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const meterRef = useRef<SoundLevelMeter | null>(null);
@@ -157,7 +161,9 @@ export default function AfterSound() {
 
   const handleListen = useCallback(async () => {
     setError(null);
+    setPlaybackError(null);
     stopAll();
+    setIsLoading(true);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
@@ -166,17 +172,23 @@ export default function AfterSound() {
       await startMeter(stream);
     } catch (err) {
       if (err instanceof DOMException && err.name === "NotAllowedError") {
-        setError("Microphone access denied. Try a sample scene below.");
+        setError("Microphone access denied. Try a sample scene below instead.");
+      } else if (err instanceof DOMException && err.name === "NotFoundError") {
+        setError("No microphone found. Try a sample scene below instead.");
       } else {
-        setError("Could not access microphone. Try a sample scene below.");
+        setError("Could not access microphone. Try a sample scene below instead.");
       }
+    } finally {
+      setIsLoading(false);
     }
   }, [startMeter, stopAll]);
 
   const handleScene = useCallback(
     async (sceneId: SceneId) => {
       setError(null);
+      setPlaybackError(null);
       stopAll();
+      setIsLoading(true);
       try {
         const ctx = new AudioContext();
         sceneCtxRef.current = ctx;
@@ -188,7 +200,9 @@ export default function AfterSound() {
         setActiveScene(sceneId);
         await startMeter(stream, ctx);
       } catch {
-        setError("Could not start scene audio.");
+        setError("Could not start scene audio. Try another scene or use your microphone.");
+      } finally {
+        setIsLoading(false);
       }
     },
     [startMeter, stopAll],
@@ -202,6 +216,7 @@ export default function AfterSound() {
   const handlePlayback = useCallback(
     async (mode: PlaybackMode) => {
       if (!resynthesisRef.current) return;
+      setPlaybackError(null);
       // Stop current playback if any
       resynthesisRef.current.stop();
       setPlaybackMode(mode);
@@ -209,7 +224,7 @@ export default function AfterSound() {
       try {
         await resynthesisRef.current.play(mode);
       } catch {
-        // playback error
+        setPlaybackError("Playback failed. Try again or start over.");
       }
       setIsPlaying(false);
     },
@@ -255,30 +270,32 @@ export default function AfterSound() {
     setPhase("revealed");
   }, []);
 
-  // GSAP entrance animation for landing
+  // GSAP entrance animation for landing (skipped if reduced motion)
   useGSAP(
     () => {
       if (phase !== "landing") return;
+      if (reducedMotion) return;
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
       tl.from("[data-animate='title']", { y: 30, opacity: 0, duration: 0.8 })
         .from("[data-animate='tagline']", { y: 20, opacity: 0, duration: 0.6 }, "-=0.4")
         .from("[data-animate='cta']", { y: 16, opacity: 0, duration: 0.5 }, "-=0.3")
         .from("[data-animate='scene-btn']", { y: 12, opacity: 0, duration: 0.4, stagger: 0.08 }, "-=0.2");
     },
-    { scope: containerRef, dependencies: [phase] },
+    { scope: containerRef, dependencies: [phase, reducedMotion] },
   );
 
-  // GSAP entrance for revealed phase
+  // GSAP entrance for revealed phase (skipped if reduced motion)
   useGSAP(
     () => {
       if (phase !== "revealed") return;
+      if (reducedMotion) return;
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
       tl.from("[data-animate='reveal-title']", { y: 20, opacity: 0, duration: 0.6 })
         .from("[data-animate='reveal-waveform']", { y: 16, opacity: 0, duration: 0.5 }, "-=0.3")
         .from("[data-animate='reveal-ab']", { y: 16, opacity: 0, duration: 0.5 }, "-=0.3")
         .from("[data-animate='reveal-audiogram']", { y: 16, opacity: 0, duration: 0.5 }, "-=0.3");
     },
-    { scope: containerRef, dependencies: [phase] },
+    { scope: containerRef, dependencies: [phase, reducedMotion] },
   );
 
   if (phase === "landing") {
@@ -310,18 +327,21 @@ export default function AfterSound() {
           <button
             data-animate="cta"
             onClick={handleListen}
-            className="mt-4 h-14 rounded-full bg-white px-8 text-base font-medium text-black transition-all hover:bg-zinc-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:scale-[0.98]"
+            disabled={isLoading}
+            className="mt-4 h-14 rounded-full bg-white px-8 text-base font-medium text-black transition-all hover:bg-zinc-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:scale-[0.98] disabled:opacity-50"
           >
-            Listen to your room
+            {isLoading ? "Starting…" : "Listen to your room"}
           </button>
 
           {error && (
-            <p className="max-w-sm text-sm text-amber-400">{error}</p>
+            <div className="flex max-w-sm flex-col items-center gap-3 rounded-2xl border border-amber-400/20 bg-amber-400/5 px-4 py-3">
+              <p className="text-sm text-amber-400">{error}</p>
+            </div>
           )}
 
           <div className="mt-8 flex flex-col items-center gap-3">
             <p className="text-sm text-zinc-500">or try a sample scene</p>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap justify-center gap-3">
               {SCENES.map((scene) => (
                 <button
                   key={scene.id}
@@ -439,7 +459,7 @@ export default function AfterSound() {
           </div>
 
           {/* A/B playback buttons */}
-          <div data-animate="reveal-ab" className="flex gap-3">
+          <div data-animate="reveal-ab" className="flex flex-col gap-3 sm:flex-row">
             <button
               onClick={() => handlePlayback("clean")}
               disabled={isPlaying}
@@ -463,6 +483,10 @@ export default function AfterSound() {
               ▶ After {age} years
             </button>
           </div>
+
+          {playbackError && (
+            <p className="max-w-sm text-sm text-amber-400">{playbackError}</p>
+          )}
 
           {/* Audiogram */}
           <div data-animate="reveal-audiogram" className="flex flex-col items-center gap-2">

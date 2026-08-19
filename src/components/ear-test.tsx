@@ -11,6 +11,7 @@ import {
 } from "@/lib/audio/staircase";
 import { startTone } from "@/lib/audio/tone-generator";
 import { AUDIO_FREQS } from "@/lib/audio/nipts";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 
 gsap.registerPlugin(useGSAP);
 
@@ -32,6 +33,7 @@ export default function EarTest({ audioCtx, onComplete, onBack }: Props) {
   const [results, setResults] = useState<{ frequency: number; threshold: number | null }[]>([]);
   const [isPlayingTone, setIsPlayingTone] = useState(false);
   const [trialCount, setTrialCount] = useState(0);
+  const reducedMotion = useReducedMotion();
 
   const staircaseRef = useRef<StaircaseState>(createStaircase(DEFAULT_STAIRCASE_CONFIG));
   const currentToneRef = useRef<{ stop: () => void } | null>(null);
@@ -149,10 +151,11 @@ export default function EarTest({ audioCtx, onComplete, onBack }: Props) {
     onComplete(results);
   }, [results, onComplete]);
 
-  // GSAP for intro
+  // GSAP for intro (skipped if reduced motion)
   useGSAP(
     () => {
       if (testPhase !== "intro") return;
+      if (reducedMotion) return;
       gsap.from("[data-animate='test-intro']", {
         y: 20,
         opacity: 0,
@@ -161,7 +164,7 @@ export default function EarTest({ audioCtx, onComplete, onBack }: Props) {
         stagger: 0.15,
       });
     },
-    { scope: containerRef, dependencies: [testPhase] },
+    { scope: containerRef, dependencies: [testPhase, reducedMotion] },
   );
 
   if (testPhase === "intro") {
@@ -223,16 +226,16 @@ export default function EarTest({ audioCtx, onComplete, onBack }: Props) {
             {isPlayingTone ? "Did you hear it?" : "Listen carefully…"}
           </p>
 
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row">
             <button
               onClick={() => handleResponse(true)}
-              className="h-16 w-32 rounded-full bg-white text-base font-medium text-black transition-all hover:bg-zinc-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:scale-[0.98]"
+              className="h-16 w-full rounded-full bg-white text-base font-medium text-black transition-all hover:bg-zinc-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:scale-[0.98] sm:w-32"
             >
               Yes, I heard it
             </button>
             <button
               onClick={() => handleResponse(false)}
-              className="h-16 w-32 rounded-full border border-white/15 text-base font-medium text-zinc-300 transition-all hover:border-white/30 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:scale-[0.98]"
+              className="h-16 w-full rounded-full border border-white/15 text-base font-medium text-zinc-300 transition-all hover:border-white/30 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:scale-[0.98] sm:w-32"
             >
               No, I didn&apos;t
             </button>

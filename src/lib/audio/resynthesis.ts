@@ -57,25 +57,51 @@ export class ResynthesisEngine {
       filter.type = "peaking";
       filter.frequency.value = point.frequency;
 
-      // Attenuate by the threshold shift (negative gain)
-      const attenuation = -point.thresholdShift;
-      filter.gain.value = attenuation;
+      // Attenuate by the threshold shift (negative gain), scaled up for perceptibility
+      // Real hearing loss is more severe than the NIPTS numbers suggest at the
+      // perceptual level — we apply a 1.5x multiplier to make the A/B more dramatic
+      const attenuation = -point.thresholdShift * 1.5;
+      filter.gain.value = Math.max(-40, attenuation);
 
-      // Q widens with severity: normal Q=1.5, degrading to Q=0.5 for severe loss
+      // Q widens with severity: normal Q=1.5, degrading to Q=0.3 for severe loss
       // Lower Q = wider bandwidth = more spectral smearing
       const severity = Math.min(1, point.thresholdShift / 40);
-      filter.Q.value = 1.5 - severity * 1.0;
+      filter.Q.value = 1.5 - severity * 1.2;
 
       this.filterChain.push(filter);
     }
 
-    // Chain the filters: input → filter[0] → filter[1] → ... → gainNode
-    let prev: AudioNode = this.filterChain[0];
-    for (let i = 1; i < this.filterChain.length; i++) {
-      prev.connect(this.filterChain[i]);
-      prev = this.filterChain[i];
+    // Add a highshelf filter for overall high-frequency rolloff
+    // Real hearing loss affects broad high-frequency regions, not just notch frequencies
+    const totalLoss = audiogram.reduce((sum, p) => sum + p.thresholdShift, 0);
+    const avgLoss = totalLoss / audiogram.length;
+    if (avgLoss > 5) {
+      const highshelf = this.audioCtx.createBiquadFilter();
+      highshelf.type = "highshelf";
+      highshelf.frequency.value = 2000;
+      highshelf.gain.value = Math.max(-15, -avgLoss * 0.8);
+      this.filterChain.push(highshelf);
     }
+
+    // Add a gentle lowpass to simulate loss of high-frequency detail
+    // The cutoff frequency decreases with increasing average loss
+    if (avgLoss > 10) {
+      const lowpass = this.audioCtx.createBiquadFilter();
+      lowpass.type = "lowpass";
+      // More loss = lower cutoff. 8000 Hz at mild loss, down to 3000 Hz at severe
+      const cutoff = Math.max(3000, 8000 - avgLoss * 100);
+      lowpass.frequency.value = cutoff;
+      lowpass.Q.value = 0.7; // gentle rolloff
+      this.filterChain.push(lowpass);
+    }
+
+    // Chain the filters: input → filter[0] → filter[1] → ... → gainNode
     if (this.filterChain.length > 0) {
+      let prev: AudioNode = this.filterChain[0];
+      for (let i = 1; i < this.filterChain.length; i++) {
+        prev.connect(this.filterChain[i]);
+        prev = this.filterChain[i];
+      }
       this.filterChain[this.filterChain.length - 1].connect(this.gainNode);
     }
   }

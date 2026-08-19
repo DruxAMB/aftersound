@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { AUDIO_FREQS, type Audiogram } from "@/lib/audio/nipts";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 
 gsap.registerPlugin(useGSAP);
 
@@ -24,6 +25,7 @@ export default function AudiogramChart({ audiogram, className }: Props) {
   const pathRef = useRef<SVGPathElement>(null);
   const dotsRef = useRef<SVGGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const reducedMotion = useReducedMotion();
 
   const width = 320;
   const height = 200;
@@ -60,29 +62,37 @@ export default function AudiogramChart({ audiogram, className }: Props) {
       const path = pathRef.current;
       path.setAttribute("d", pathD);
 
-      // GSAP draw-on reveal (documented recipe)
-      const pathLength = path.getTotalLength();
-      gsap.set(path, { strokeDasharray: pathLength, strokeDashoffset: pathLength });
-      gsap.to(path, {
-        strokeDashoffset: 0,
-        duration: 1.2,
-        ease: "power2.inOut",
-      });
-
-      // Animate dots in after the line
-      if (dotsRef.current) {
-        const dots = dotsRef.current.querySelectorAll("circle");
-        gsap.from(dots, {
-          scale: 0,
-          opacity: 0,
-          duration: 0.3,
-          stagger: 0.1,
-          ease: "back.out(2)",
-          delay: 0.8,
+      // GSAP draw-on reveal (documented recipe) — skipped if reduced motion
+      if (reducedMotion) {
+        // Just show the path and dots immediately
+        gsap.set(path, { strokeDashoffset: 0 });
+        if (dotsRef.current) {
+          gsap.set(dotsRef.current.querySelectorAll("circle"), { scale: 1, opacity: 1 });
+        }
+      } else {
+        const pathLength = path.getTotalLength();
+        gsap.set(path, { strokeDasharray: pathLength, strokeDashoffset: pathLength });
+        gsap.to(path, {
+          strokeDashoffset: 0,
+          duration: 1.2,
+          ease: "power2.inOut",
         });
+
+        // Animate dots in after the line
+        if (dotsRef.current) {
+          const dots = dotsRef.current.querySelectorAll("circle");
+          gsap.from(dots, {
+            scale: 0,
+            opacity: 0,
+            duration: 0.3,
+            stagger: 0.1,
+            ease: "back.out(2)",
+            delay: 0.8,
+          });
+        }
       }
     },
-    { scope: containerRef, dependencies: [audiogram] },
+    { scope: containerRef, dependencies: [audiogram, reducedMotion] },
   );
 
   const freqLabels = [250, 1000, 4000, 8000];
