@@ -1,15 +1,23 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Instrument_Serif, DM_Mono } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
+  variable: "--font-geist",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument-serif",
   subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+});
+
+const dmMono = DM_Mono({
+  variable: "--font-dm-mono",
+  subsets: ["latin"],
+  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -38,9 +46,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${instrumentSerif.variable} ${dmMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-void-black text-paper-white">
+        {children}
+      </body>
     </html>
   );
 }

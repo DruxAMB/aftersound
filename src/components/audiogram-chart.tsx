@@ -116,7 +116,7 @@ export default function AudiogramChart({ audiogram, className }: Props) {
             y1={yScale(db)}
             x2={width - padding.right}
             y2={yScale(db)}
-            stroke="rgba(255,255,255,0.08)"
+            stroke="#282828"
             strokeWidth="1"
           />
         ))}
@@ -127,7 +127,7 @@ export default function AudiogramChart({ audiogram, className }: Props) {
             y1={padding.top}
             x2={xScale(freq)}
             y2={height - padding.bottom}
-            stroke="rgba(255,255,255,0.05)"
+            stroke="#1f1f1f"
             strokeWidth="1"
           />
         ))}
@@ -139,7 +139,8 @@ export default function AudiogramChart({ audiogram, className }: Props) {
             x={padding.left - 8}
             y={yScale(db) + 4}
             textAnchor="end"
-            className="fill-zinc-600 text-[10px]"
+            className="fill-[#7f7f7f] text-[10px]"
+            style={{ fontFamily: "var(--font-dm-mono), monospace" }}
           >
             {db}
           </text>
@@ -148,7 +149,8 @@ export default function AudiogramChart({ audiogram, className }: Props) {
           x={8}
           y={height / 2}
           textAnchor="middle"
-          className="fill-zinc-600 text-[9px]"
+          className="fill-[#7f7f7f] text-[9px]"
+          style={{ fontFamily: "var(--font-dm-mono), monospace" }}
           transform={`rotate(-90 8 ${height / 2})`}
         >
           dB loss
@@ -161,7 +163,8 @@ export default function AudiogramChart({ audiogram, className }: Props) {
             x={xScale(freq)}
             y={height - padding.bottom + 16}
             textAnchor="middle"
-            className="fill-zinc-600 text-[10px]"
+            className="fill-[#7f7f7f] text-[10px]"
+            style={{ fontFamily: "var(--font-dm-mono), monospace" }}
           >
             {freq >= 1000 ? `${freq / 1000}k` : freq}
           </text>
@@ -173,22 +176,22 @@ export default function AudiogramChart({ audiogram, className }: Props) {
           y1={yScale(0)}
           x2={width - padding.right}
           y2={yScale(0)}
-          stroke="rgba(255,255,255,0.2)"
+          stroke="#363636"
           strokeWidth="1"
           strokeDasharray="4 4"
         />
 
-        {/* Audiogram line */}
+        {/* Audiogram line — electric cyan */}
         <path
           ref={pathRef}
           fill="none"
-          stroke="white"
+          stroke="#19d0e8"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
 
-        {/* Data points */}
+        {/* Data points — electric cyan */}
         <g ref={dotsRef}>
           {audiogram?.map((p, i) => (
             <circle
@@ -196,7 +199,7 @@ export default function AudiogramChart({ audiogram, className }: Props) {
               cx={xScale(p.frequency)}
               cy={yScale(p.thresholdShift)}
               r="3"
-              fill="white"
+              fill="#19d0e8"
             />
           ))}
         </g>

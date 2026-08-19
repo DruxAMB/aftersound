@@ -170,38 +170,40 @@ export default function EarTest({ audioCtx, onComplete, onBack }: Props) {
 
   if (testPhase === "intro") {
     return (
-      <div ref={containerRef} className="flex min-h-dvh flex-col bg-black px-6 py-8">
+      <div ref={containerRef} className="flex min-h-dvh flex-col bg-void-black px-6 py-8">
         <header className="flex items-center justify-between">
-          <span className="text-sm font-medium text-zinc-500">Ear test</span>
+          <span className="ui-mono text-caption uppercase caption-tracking text-steel-gray">Ear test</span>
           <button
             onClick={onBack}
-            className="h-9 rounded-full border border-white/15 px-4 text-sm text-zinc-400 transition-all hover:border-white/30 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="ui-mono h-9 rounded-full border border-graphite px-4 text-caption caption-tracking text-steel-gray transition-all hover:border-electric-cyan hover:text-electric-cyan focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric-cyan"
           >
             Back
           </button>
         </header>
 
-        <main className="flex flex-1 flex-col items-center justify-center gap-6">
-          <h2 data-animate="test-intro" className="text-2xl font-semibold text-white sm:text-3xl">
-            Test your actual hearing
+        <main className="flex flex-1 flex-col items-center justify-center gap-8">
+          <h2 data-animate="test-intro" className="heading-serif text-heading text-paper-white sm:text-heading-lg text-center">
+            Test your
+            <br />
+            actual hearing
           </h2>
-          <div data-animate="test-intro" className="max-w-md space-y-3 text-center">
-            <p className="text-zinc-400">
+          <div data-animate="test-intro" className="max-w-md space-y-4 text-center">
+            <p className="text-body text-steel-gray">
               We&apos;ll play tones at {TEST_FREQS.map((f) => (f >= 1000 ? `${f / 1000}k` : f)).join(" and ")} Hz,
               getting quieter until you can barely hear them.
             </p>
-            <p className="text-sm text-zinc-500">
-              For best results: use headphones, be in a quiet room, and close your eyes.
+            <p className="ui-mono text-caption caption-tracking text-steel-gray">
+              For best results: use headphones, be in a quiet room, close your eyes
             </p>
-            <p className="text-xs text-amber-400/80">
-              This is not a clinical hearing test. Results are approximate and depend on
-              your headphones and environment.
+            <p className="ui-mono text-caption caption-tracking text-electric-cyan">
+              Not a clinical hearing test · results are approximate
             </p>
           </div>
           <button
             data-animate="test-intro"
             onClick={handleStart}
-            className="h-12 rounded-full bg-white px-8 text-base font-medium text-black transition-all hover:bg-zinc-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:scale-[0.98]"
+            className="ui-mono mt-4 h-12 rounded-full bg-electric-cyan px-8 text-sm text-void-black transition-all hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric-cyan active:scale-[0.98]"
+            style={{ boxShadow: "0 0 24px rgba(25,208,232,0.3)" }}
           >
             Start ear test
           </button>
@@ -214,36 +216,36 @@ export default function EarTest({ audioCtx, onComplete, onBack }: Props) {
     const freq = TEST_FREQS[currentFreqIndex];
     const freqLabel = freq >= 1000 ? `${freq / 1000}k` : freq;
     return (
-      <div className="flex min-h-dvh flex-col bg-black px-6 py-8">
+      <div className="flex min-h-dvh flex-col bg-void-black px-6 py-8">
         <header className="flex items-center justify-between">
-          <span className="text-sm font-medium text-zinc-500">
-            Testing {freqLabel} Hz ({currentFreqIndex + 1}/{TEST_FREQS.length})
+          <span className="ui-mono text-caption uppercase caption-tracking text-steel-gray">
+            Testing {freqLabel} Hz · {currentFreqIndex + 1}/{TEST_FREQS.length}
           </span>
-          <span className="text-xs text-zinc-600 tabular-nums">Trial {trialCount}</span>
+          <span className="ui-mono text-caption caption-tracking text-steel-gray tabular-nums">Trial {trialCount}</span>
         </header>
 
-        <main className="flex flex-1 flex-col items-center justify-center gap-8">
-          <p className="text-lg text-zinc-400">
+        <main className="flex flex-1 flex-col items-center justify-center gap-10">
+          <p className="heading-serif text-heading-sm text-paper-white">
             {isPlayingTone ? "Did you hear it?" : "Listen carefully…"}
           </p>
 
           <div className="flex flex-col gap-4 sm:flex-row">
             <button
               onClick={() => handleResponse(true)}
-              className="h-16 w-full rounded-full bg-white text-base font-medium text-black transition-all hover:bg-zinc-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:scale-[0.98] sm:w-32"
+              className="ui-mono h-14 w-full rounded-full bg-electric-cyan px-8 text-caption caption-tracking text-void-black transition-all hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric-cyan active:scale-[0.98] sm:w-40"
             >
               Yes, I heard it
             </button>
             <button
               onClick={() => handleResponse(false)}
-              className="h-16 w-full rounded-full border border-white/15 text-base font-medium text-zinc-300 transition-all hover:border-white/30 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:scale-[0.98] sm:w-32"
+              className="ui-mono h-14 w-full rounded-full border border-graphite px-8 text-caption caption-tracking text-steel-gray transition-all hover:border-electric-cyan hover:text-electric-cyan focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric-cyan active:scale-[0.98] sm:w-40"
             >
               No, I didn&apos;t
             </button>
           </div>
 
-          <p className="max-w-xs text-center text-xs text-zinc-600">
-            Tones play at random intervals. Respond only after you hear (or don&apos;t hear) a tone.
+          <p className="ui-mono max-w-xs text-center text-caption caption-tracking text-steel-gray">
+            Tones play at random intervals · respond only after you hear (or don&apos;t hear) a tone
           </p>
         </main>
       </div>
@@ -252,40 +254,42 @@ export default function EarTest({ audioCtx, onComplete, onBack }: Props) {
 
   // Done phase
   return (
-    <div className="flex min-h-dvh flex-col bg-black px-6 py-8">
+    <div className="flex min-h-dvh flex-col bg-void-black px-6 py-8">
       <header className="flex items-center justify-between">
-        <span className="text-sm font-medium text-zinc-500">Ear test results</span>
+        <span className="ui-mono text-caption uppercase caption-tracking text-steel-gray">Ear test results</span>
       </header>
 
-      <main className="flex flex-1 flex-col items-center justify-center gap-8">
-        <h2 className="text-2xl font-semibold text-white sm:text-3xl">
-          Your measured thresholds
+      <main className="flex flex-1 flex-col items-center justify-center gap-10">
+        <h2 className="heading-serif text-heading text-paper-white sm:text-heading-lg text-center">
+          Your measured
+          <br />
+          thresholds
         </h2>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
           {results.map((r, i) => (
             <div
               key={i}
-              className="flex items-center justify-between gap-8 rounded-2xl border border-white/10 px-6 py-4"
+              className="flex items-center justify-between gap-12 rounded-cards border border-graphite bg-midnight-surface px-6 py-4"
             >
-              <span className="text-sm text-zinc-400">
+              <span className="ui-mono text-caption caption-tracking text-steel-gray">
                 {r.frequency >= 1000 ? `${r.frequency / 1000}k` : r.frequency} Hz
               </span>
-              <span className="text-2xl font-semibold tabular-nums text-white">
+              <span className="heading-serif text-heading-sm text-electric-cyan tabular-nums">
                 {r.threshold != null ? `${Math.round(r.threshold)} dB HL` : "—"}
               </span>
             </div>
           ))}
         </div>
 
-        <p className="max-w-sm text-center text-xs text-zinc-600">
-          These thresholds replace the population average in your projection.
-          Higher thresholds than expected may indicate existing hearing loss.
+        <p className="ui-mono max-w-sm text-center text-caption caption-tracking text-steel-gray">
+          These thresholds replace the population average in your projection
         </p>
 
         <button
           onClick={handleFinish}
-          className="h-12 rounded-full bg-white px-8 text-base font-medium text-black transition-all hover:bg-zinc-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:scale-[0.98]"
+          className="ui-mono h-12 rounded-full bg-electric-cyan px-8 text-sm text-void-black transition-all hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric-cyan active:scale-[0.98]"
+          style={{ boxShadow: "0 0 24px rgba(25,208,232,0.3)" }}
         >
           See my updated projection
         </button>

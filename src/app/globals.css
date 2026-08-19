@@ -1,31 +1,71 @@
 @import "tailwindcss";
 
-:root {
-  /* One accent (white on black — the product is about silence and loss) */
-  --background: #000000;
-  --foreground: #ededed;
-  --muted: #18181b;
-  --muted-foreground: #71717a;
-  --card: #111113;
-  --border: rgba(255, 255, 255, 0.1);
-  --primary: #ffffff;
-  --primary-foreground: #000000;
-  --destructive: #ef4444;
-  --success: #22c55e;
-  --warning: #f59e0b;
+@theme {
+  /* Colors — Monologue token system */
+  --color-electric-cyan: #19d0e8;
+  --color-sky-signal: #44ccff;
+  --color-deep-teal: #062f34;
+  --color-void-black: #000000;
+  --color-obsidian: #010101;
+  --color-midnight-surface: #191919;
+  --color-graphite: #282828;
+  --color-charcoal: #363636;
+  --color-slate: #3f3f3f;
+  --color-steel-gray: #7f7f7f;
+  --color-paper-white: #ffffff;
+  --color-ghost-gray: #c0c0c0;
+
+  /* Typography — Font Families */
+  --font-instrument-serif: "Instrument Serif", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-dm-mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-geist: "Geist", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Typography — Scale */
+  --text-caption: 10px;
+  --text-body: 17px;
+  --text-subheading: 20px;
+  --text-heading-sm: 32px;
+  --text-heading: 48px;
+  --text-heading-lg: 72px;
+  --text-display: 96px;
+
+  /* Spacing */
+  --spacing-5: 5px;
+  --spacing-6: 6px;
+  --spacing-8: 8px;
+  --spacing-10: 10px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --spacing-20: 20px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
+  --spacing-40: 40px;
+  --spacing-72: 72px;
+
+  /* Border Radius */
+  --radius-tags: 100000px;
+  --radius-cards: 18px;
+  --radius-large: 12px;
+  --radius-small: 4px;
+  --radius-medium: 8px;
+  --radius-buttons: 100000px;
+
+  /* Shadows */
+  --shadow-subtle: rgba(0, 0, 0, 0.7) 3px 3px 2px 0px inset, rgba(255, 255, 255, 0.25) 3px 2px 2px 0px;
+  --shadow-sm: rgba(0, 0, 0, 0.25) 0px 4px 4px 0px, rgba(255, 255, 255, 0.25) 1px 1px 2px 0px, rgba(0, 0, 0, 0.5) 1px 1px 1px 0px inset, rgba(0, 0, 0, 0.7) 2px 2px 12px 0px inset;
+  --shadow-subtle-2: rgba(0, 0, 0, 0.63) 0px 0px 0px 1px;
+  --shadow-md: rgb(14, 93, 102) 6px 6px 10px 0px inset, rgba(255, 255, 255, 0.2) 4px 4px 4px 0px, rgba(255, 255, 255, 0.25) 1px 1px 2px 0px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root {
+  --background: #000000;
+  --foreground: #ffffff;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -43,45 +83,85 @@ body {
 
 /* Landing page — slow breathing glow */
 @keyframes pulse-slow {
-  0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  50% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.05); }
+  0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.05); }
 }
 
 .animate-pulse-slow {
   animation: pulse-slow 4s ease-in-out infinite;
 }
 
-/* Landing page — equalizer bars (decorative, no audio) */
-@keyframes eq-bar {
-  0%, 100% { height: 10%; }
-  50% { height: 80%; }
-}
-
-.animate-eq-bar {
-  animation: eq-bar 1.5s ease-in-out infinite;
-}
-
-/* Range slider styling — consistent across browsers */
+/* Range slider styling — cyan thumb on dark track */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
+  background: transparent;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 2px;
+  background: #282828;
+  border-radius: 100000px;
 }
 
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  background: #ffffff;
+  background: #19d0e8;
   cursor: pointer;
+  margin-top: -6px;
+  box-shadow: 0 0 8px rgba(25, 208, 232, 0.4);
+}
+
+input[type="range"]::-moz-range-track {
+  height: 2px;
+  background: #282828;
+  border-radius: 100000px;
 }
 
 input[type="range"]::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  background: #ffffff;
+  background: #19d0e8;
   cursor: pointer;
   border: none;
+  box-shadow: 0 0 8px rgba(25, 208, 232, 0.4);
+}
+
+/* Ghost wordmark — Instrument Serif italic at massive scale */
+.ghost-wordmark {
+  font-family: var(--font-instrument-serif);
+  font-style: italic;
+  font-weight: 400;
+  color: #c0c0c0;
+  opacity: 0.08;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Editorial heading — Instrument Serif italic */
+.heading-serif {
+  font-family: var(--font-instrument-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+/* UI chrome — DM Mono */
+.ui-mono {
+  font-family: var(--font-dm-mono);
+  font-weight: 400;
+}
+
+/* Caption tracking */
+.caption-tracking {
+  letter-spacing: 0.021em;
 }

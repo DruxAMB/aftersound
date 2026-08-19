@@ -303,67 +303,78 @@ export default function AfterSound() {
 
   if (phase === "landing") {
     return (
-      <div ref={containerRef} className="flex min-h-dvh flex-col items-center justify-center bg-black px-6 text-center">
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div
-            className="absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full animate-pulse-slow"
-            style={{ background: "radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%)" }}
-          />
-          {/* Animated equalizer bars — subtle, no audio needed */}
-          <div className="absolute bottom-0 left-0 right-0 flex h-32 items-end justify-center gap-1 opacity-20">
-            {Array.from({ length: 40 }).map((_, i) => (
-              <div
-                key={i}
-                className="w-1 flex-1 animate-eq-bar rounded-full bg-white"
-                style={{
-                  animationDelay: `${i * 0.05}s`,
-                  animationDuration: `${1.5 + (i % 5) * 0.3}s`,
-                }}
-              />
-            ))}
-          </div>
+      <div ref={containerRef} className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-void-black px-6 text-center">
+        {/* Ghost wordmark — Instrument Serif italic, overflowing viewport */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden">
+          <span className="ghost-wordmark text-[200px] sm:text-[320px] md:text-[400px]">
+            AfterSound
+          </span>
         </div>
 
-        <main className="relative z-10 flex flex-col items-center gap-6">
-          <h1
-            data-animate="title"
-            className="text-5xl font-semibold tracking-tight text-white sm:text-7xl"
-          >
-            AfterSound
-          </h1>
+        {/* Cyan glow — the single chromatic pulse */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div
+            className="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full animate-pulse-slow"
+            style={{ background: "radial-gradient(circle, rgba(25,208,232,0.08) 0%, transparent 70%)" }}
+          />
+        </div>
+
+        <main className="relative z-10 flex flex-col items-center gap-8">
+          {/* DM Mono caption — system metadata */}
           <p
-            data-animate="tagline"
-            className="max-w-md text-lg leading-8 text-zinc-400 sm:text-xl"
+            data-animate="title"
+            className="ui-mono text-caption uppercase caption-tracking text-steel-gray"
           >
-            You can&apos;t hear the damage happening.
-            <br />
-            <span className="text-zinc-200">Now you can.</span>
+            Hearing · Projection · Resynthesis
           </p>
 
+          {/* Italic serif headline — the editorial signature */}
+          <h1
+            data-animate="tagline"
+            className="heading-serif text-heading-lg text-paper-white sm:text-display"
+          >
+            You can&apos;t hear
+            <br />
+            the damage happening.
+          </h1>
+
+          <p
+            data-animate="tagline"
+            className="heading-serif text-subheading text-electric-cyan"
+          >
+            Now you can.
+          </p>
+
+          {/* Cyan CTA pill */}
           <button
             data-animate="cta"
             onClick={handleListen}
             disabled={isLoading}
-            className="mt-4 h-14 rounded-full bg-white px-8 text-base font-medium text-black transition-all hover:bg-zinc-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:scale-[0.98] disabled:opacity-50"
+            className="ui-mono mt-8 h-12 rounded-full bg-electric-cyan px-8 text-sm text-void-black transition-all hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric-cyan active:scale-[0.98] disabled:opacity-50"
+            style={{ boxShadow: "0 0 24px rgba(25,208,232,0.3)" }}
           >
             {isLoading ? "Starting…" : "Listen to your room"}
           </button>
 
           {error && (
-            <div className="flex max-w-sm flex-col items-center gap-3 rounded-2xl border border-amber-400/20 bg-amber-400/5 px-4 py-3">
-              <p className="text-sm text-amber-400">{error}</p>
+            <div className="flex max-w-sm flex-col items-center gap-2 rounded-medium border border-charcoal bg-midnight-surface px-5 py-4">
+              <p className="ui-mono text-caption caption-tracking text-electric-cyan">ERROR</p>
+              <p className="text-sm text-steel-gray">{error}</p>
             </div>
           )}
 
-          <div className="mt-8 flex flex-col items-center gap-3">
-            <p className="text-sm text-zinc-500">or try a sample scene</p>
+          {/* Scene buttons — ghost buttons with DM Mono labels */}
+          <div className="mt-12 flex flex-col items-center gap-4">
+            <p className="ui-mono text-caption uppercase caption-tracking text-steel-gray">
+              or try a sample scene
+            </p>
             <div className="flex flex-wrap justify-center gap-3">
               {SCENES.map((scene) => (
                 <button
                   key={scene.id}
                   data-animate="scene-btn"
                   onClick={() => handleScene(scene.id)}
-                  className="h-10 rounded-full border border-white/15 px-5 text-sm text-zinc-300 transition-all hover:border-white/30 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:scale-[0.98]"
+                  className="ui-mono h-9 rounded-full border border-graphite px-5 text-caption caption-tracking text-steel-gray transition-all hover:border-electric-cyan hover:text-electric-cyan focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric-cyan active:scale-[0.98]"
                 >
                   {scene.label}
                 </button>
@@ -381,27 +392,27 @@ export default function AfterSound() {
       ? `${SCENES.find((s) => s.id === activeScene)?.label} · 5s`
       : "your room · 5s";
     return (
-      <div className="flex min-h-dvh flex-col bg-black px-6 py-8">
+      <div className="flex min-h-dvh flex-col bg-void-black px-6 py-8">
         <header className="flex items-center justify-between">
-          <span className="text-sm font-medium text-zinc-500">
+          <span className="ui-mono text-caption uppercase caption-tracking text-steel-gray">
             {activeScene ? `${SCENES.find((s) => s.id === activeScene)?.label} scene` : "Your room"}
           </span>
           <button
             onClick={handleStop}
-            className="h-9 rounded-full border border-white/15 px-4 text-sm text-zinc-400 transition-all hover:border-white/30 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="ui-mono h-9 rounded-full border border-graphite px-4 text-caption caption-tracking text-steel-gray transition-all hover:border-electric-cyan hover:text-electric-cyan focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric-cyan"
           >
             Stop
           </button>
         </header>
 
-        <main className="flex flex-1 flex-col items-center justify-center gap-8">
-          {/* Live dB readout */}
+        <main className="flex flex-1 flex-col items-center justify-center gap-10">
+          {/* Live dB readout — Instrument Serif at display scale */}
           <div className="flex flex-col items-center">
-            <div className="text-7xl font-semibold tabular-nums text-white sm:text-8xl">
+            <div className="heading-serif text-display text-paper-white sm:text-[120px]">
               {laeq != null && isFinite(laeq) ? Math.round(laeq) : "—"}
             </div>
-            <div className="mt-1 text-sm font-medium uppercase tracking-widest text-zinc-500">
-              dBA
+            <div className="ui-mono mt-2 text-caption uppercase caption-tracking text-steel-gray">
+              dBA · A-weighted
             </div>
           </div>
 
@@ -411,31 +422,31 @@ export default function AfterSound() {
             className="w-full max-w-2xl"
           />
 
-          {/* NIOSH safe daily dose */}
-          <div className="flex flex-col items-center gap-1">
-            <p className="text-sm text-zinc-500">
-              At this level, your safe daily exposure is
+          {/* NIOSH safe daily dose — midnight card */}
+          <div className="flex flex-col items-center gap-2 rounded-cards border border-graphite bg-midnight-surface px-8 py-5">
+            <p className="ui-mono text-caption uppercase caption-tracking text-steel-gray">
+              Safe daily exposure
             </p>
-            <p className="text-2xl font-medium text-white">
+            <p className="heading-serif text-heading-sm text-electric-cyan">
               {safeTime != null ? formatDuration(safeTime) : "—"}
             </p>
-            <p className="text-xs text-zinc-600">
+            <p className="ui-mono text-caption caption-tracking text-steel-gray">
               NIOSH REL · 85 dBA · 3 dB exchange rate
             </p>
           </div>
 
-          {/* Capture progress */}
+          {/* Capture progress — cyan progress bar */}
           <div className="flex w-full max-w-xs flex-col items-center gap-2">
-            <div className="flex items-center justify-between text-xs text-zinc-500">
+            <div className="ui-mono flex items-center justify-between text-caption caption-tracking text-steel-gray w-full">
               <span>Capturing {captureLabel}</span>
               <span className="tabular-nums">
                 {Math.ceil(CAPTURE_DURATION - (captureProgress / 100) * CAPTURE_DURATION)}s
               </span>
             </div>
-            <div className="h-1 w-full overflow-hidden rounded-full bg-white/10">
+            <div className="h-[2px] w-full overflow-hidden rounded-full bg-graphite">
               <div
-                className="h-full rounded-full bg-white transition-[width] duration-100 ease-linear"
-                style={{ width: `${captureProgress}%` }}
+                className="h-full rounded-full bg-electric-cyan transition-[width] duration-100 ease-linear"
+                style={{ width: `${captureProgress}%`, boxShadow: "0 0 8px rgba(25,208,232,0.5)" }}
               />
             </div>
           </div>
@@ -449,20 +460,25 @@ export default function AfterSound() {
       ? `${SCENES.find((s) => s.id === activeScene)?.label} · 5s`
       : "your room · 5s";
     return (
-      <div ref={containerRef} className="flex min-h-dvh flex-col bg-black px-6 py-8">
+      <div ref={containerRef} className="flex min-h-dvh flex-col bg-void-black px-6 py-8">
         <header className="flex items-center justify-between">
-          <span className="text-sm font-medium text-zinc-500">Your reveal</span>
+          <span className="ui-mono text-caption uppercase caption-tracking text-steel-gray">
+            Your reveal
+          </span>
           <button
             onClick={handleStop}
-            className="h-9 rounded-full border border-white/15 px-4 text-sm text-zinc-400 transition-all hover:border-white/30 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="ui-mono h-9 rounded-full border border-graphite px-4 text-caption caption-tracking text-steel-gray transition-all hover:border-electric-cyan hover:text-electric-cyan focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric-cyan"
           >
             Start over
           </button>
         </header>
 
-        <main className="flex flex-1 flex-col items-center justify-center gap-8">
-          <h2 data-animate="reveal-title" className="text-2xl font-semibold text-white sm:text-3xl">
-            This is what it could sound like
+        <main className="flex flex-1 flex-col items-center justify-center gap-10">
+          {/* Italic serif heading — the editorial signature */}
+          <h2 data-animate="reveal-title" className="heading-serif text-heading text-paper-white sm:text-heading-lg">
+            This is what it
+            <br />
+            could sound like
           </h2>
 
           {/* Waveform chip */}
@@ -474,15 +490,15 @@ export default function AfterSound() {
             />
           </div>
 
-          {/* A/B playback buttons */}
+          {/* A/B playback buttons — ghost buttons, cyan when active */}
           <div data-animate="reveal-ab" className="flex flex-col gap-3 sm:flex-row">
             <button
               onClick={() => handlePlayback("clean")}
               disabled={isPlaying}
-              className={`h-12 rounded-full px-6 text-sm font-medium transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:opacity-50 ${
+              className={`ui-mono h-12 rounded-full px-6 text-caption caption-tracking transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric-cyan disabled:opacity-40 ${
                 playbackMode === "clean" && isPlaying
-                  ? "bg-white text-black"
-                  : "border border-white/15 text-zinc-300 hover:border-white/30 hover:text-white"
+                  ? "bg-electric-cyan text-void-black"
+                  : "border border-graphite text-steel-gray hover:border-electric-cyan hover:text-electric-cyan"
               }`}
             >
               ▶ As you heard it
@@ -490,10 +506,10 @@ export default function AfterSound() {
             <button
               onClick={() => handlePlayback("projected")}
               disabled={isPlaying}
-              className={`h-12 rounded-full px-6 text-sm font-medium transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:opacity-50 ${
+              className={`ui-mono h-12 rounded-full px-6 text-caption caption-tracking transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric-cyan disabled:opacity-40 ${
                 playbackMode === "projected" && isPlaying
-                  ? "bg-white text-black"
-                  : "border border-white/15 text-zinc-300 hover:border-white/30 hover:text-white"
+                  ? "bg-electric-cyan text-void-black"
+                  : "border border-graphite text-steel-gray hover:border-electric-cyan hover:text-electric-cyan"
               }`}
             >
               ▶ After {age} years
@@ -501,23 +517,23 @@ export default function AfterSound() {
           </div>
 
           {playbackError && (
-            <p className="max-w-sm text-sm text-amber-400">{playbackError}</p>
+            <p className="ui-mono max-w-sm text-caption caption-tracking text-electric-cyan">{playbackError}</p>
           )}
 
-          {/* Audiogram */}
-          <div data-animate="reveal-audiogram" className="flex flex-col items-center gap-2">
-            <p className="text-sm text-zinc-500">
-              Projected hearing loss at age {age} · {dailyExposure} dBA daily
+          {/* Audiogram — midnight card */}
+          <div data-animate="reveal-audiogram" className="flex flex-col items-center gap-3 rounded-cards border border-graphite bg-midnight-surface px-6 py-5">
+            <p className="ui-mono text-caption uppercase caption-tracking text-steel-gray">
+              Projected loss · age {age} · {dailyExposure} dBA daily
             </p>
             <AudiogramChart audiogram={audiogram} className="w-full max-w-sm" />
           </div>
 
           {/* Age and exposure sliders */}
-          <div className="flex w-full max-w-sm flex-col gap-4">
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center justify-between text-sm">
-                <label htmlFor="age-slider" className="text-zinc-400">Age</label>
-                <span className="tabular-nums text-white">{age}</span>
+          <div className="flex w-full max-w-sm flex-col gap-6">
+            <div className="flex flex-col gap-2">
+              <div className="ui-mono flex items-center justify-between text-caption caption-tracking">
+                <label htmlFor="age-slider" className="text-steel-gray">Age</label>
+                <span className="tabular-nums text-electric-cyan">{age}</span>
               </div>
               <input
                 id="age-slider"
@@ -526,13 +542,13 @@ export default function AfterSound() {
                 max={80}
                 value={age}
                 onChange={(e) => setAge(Number(e.target.value))}
-                className="h-1 w-full cursor-pointer appearance-none rounded-full bg-white/15 accent-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className="h-[2px] w-full cursor-pointer appearance-none rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric-cyan"
               />
             </div>
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center justify-between text-sm">
-                <label htmlFor="exposure-slider" className="text-zinc-400">Daily exposure</label>
-                <span className="tabular-nums text-white">{dailyExposure} dBA</span>
+            <div className="flex flex-col gap-2">
+              <div className="ui-mono flex items-center justify-between text-caption caption-tracking">
+                <label htmlFor="exposure-slider" className="text-steel-gray">Daily exposure</label>
+                <span className="tabular-nums text-electric-cyan">{dailyExposure} dBA</span>
               </div>
               <input
                 id="exposure-slider"
@@ -541,53 +557,55 @@ export default function AfterSound() {
                 max={110}
                 value={dailyExposure}
                 onChange={(e) => setDailyExposure(Number(e.target.value))}
-                className="h-1 w-full cursor-pointer appearance-none rounded-full bg-white/15 accent-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className="h-[2px] w-full cursor-pointer appearance-none rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric-cyan"
               />
             </div>
           </div>
 
           {/* Ear test CTA */}
-          <div className="flex flex-col items-center gap-2 border-t border-white/10 pt-6">
+          <div className="flex flex-col items-center gap-3 border-t border-graphite pt-8">
             {earTestResults.length > 0 && (
-              <p className="text-xs text-green-400/80">
-                ✓ Measured thresholds applied to your projection
+              <p className="ui-mono text-caption caption-tracking text-electric-cyan">
+                ✓ Measured thresholds applied
               </p>
             )}
             <button
               onClick={handleStartEarTest}
-              className="h-11 rounded-full border border-white/15 px-6 text-sm font-medium text-zinc-300 transition-all hover:border-white/30 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:scale-[0.98]"
+              className="ui-mono h-11 rounded-full border border-graphite px-6 text-caption caption-tracking text-steel-gray transition-all hover:border-electric-cyan hover:text-electric-cyan focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric-cyan active:scale-[0.98]"
             >
-              {earTestResults.length > 0 ? "Retest your actual hearing" : "Test your actual hearing"}
+              {earTestResults.length > 0 ? "Retest your hearing" : "Test your actual hearing"}
             </button>
-            <p className="text-xs text-zinc-600">90 seconds · headphones recommended</p>
+            <p className="ui-mono text-caption caption-tracking text-steel-gray">
+              90 seconds · headphones recommended
+            </p>
           </div>
 
-          {/* Honest limits panel */}
-          <details className="w-full max-w-md rounded-2xl border border-white/10 bg-white/[0.02] p-4">
-            <summary className="cursor-pointer text-sm font-medium text-zinc-400 transition-colors hover:text-zinc-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+          {/* Honest limits panel — midnight card */}
+          <details className="w-full max-w-md rounded-cards border border-graphite bg-midnight-surface p-6">
+            <summary className="ui-mono cursor-pointer text-caption uppercase caption-tracking text-steel-gray transition-colors hover:text-electric-cyan focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric-cyan">
               What this tool can and can&apos;t do
             </summary>
-            <div className="mt-4 space-y-3 text-xs leading-5 text-zinc-500">
+            <div className="mt-5 space-y-4 text-body leading-relaxed text-steel-gray">
               <p>
-                <span className="text-zinc-300">Sound level:</span> The dB reading is
+                <span className="text-paper-white">Sound level:</span> The dB reading is
                 uncalibrated. Consumer microphones vary ±15-20 dB from professional
                 equipment. Use it to compare environments, not as an absolute measurement.
               </p>
               <p>
-                <span className="text-zinc-300">Hearing loss projection:</span> The NIPTS
+                <span className="text-paper-white">Hearing loss projection:</span> The NIPTS
                 model is our own approximation, not the ISO 1999 standard (which is
                 paywalled). It captures the general shape of noise-induced hearing loss
                 (the 4 kHz notch, logarithmic age growth) but should not be used for risk
                 assessment. For that, see an audiologist.
               </p>
               <p>
-                <span className="text-zinc-300">Ear test:</span> This is not a clinical
+                <span className="text-paper-white">Ear test:</span> This is not a clinical
                 audiometer. Results depend on your headphones, background noise, and
                 response honesty. Calibrated audiometric equipment in a sound-treated booth
                 is the only way to get a real threshold.
               </p>
               <p>
-                <span className="text-zinc-300">Resynthesis:</span> The &quot;after N years&quot;
+                <span className="text-paper-white">Resynthesis:</span> The &quot;after N years&quot;
                 playback models hearing loss as frequency attenuation and spectral smearing.
                 Real hearing loss also involves reduced dynamic range, temporal smearing,
                 and tinnitus — which this tool does not simulate.
@@ -595,17 +613,17 @@ export default function AfterSound() {
             </div>
           </details>
 
-          {/* Closing beat */}
-          <div className="flex w-full max-w-md flex-col items-center gap-3 border-t border-white/10 pt-6 text-center">
-            <p className="text-base text-zinc-300">
+          {/* Closing beat — italic serif + DM Mono caption */}
+          <div className="flex w-full max-w-md flex-col items-center gap-4 border-t border-graphite pt-8 text-center">
+            <p className="heading-serif text-heading-sm text-paper-white">
               You can&apos;t undo hearing damage.
             </p>
-            <p className="text-sm text-zinc-500">
+            <p className="text-body text-steel-gray">
               But you can prevent it. Lower the volume, take breaks, and wear protection
               in loud environments.
             </p>
-            <p className="text-xs text-zinc-600">
-              NIOSH recommends 85 dBA max for 8 hours. 3 dB louder = half the safe time.
+            <p className="ui-mono text-caption caption-tracking text-steel-gray">
+              NIOSH recommends 85 dBA max for 8 hours · 3 dB louder = half the safe time
             </p>
           </div>
         </main>
