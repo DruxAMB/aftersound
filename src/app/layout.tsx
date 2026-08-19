@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     type: "website",
     url: "https://aftersound-fawn.vercel.app",
     siteName: "AfterSound",
-    images: ["/og-image.svg"],
+    images: ["/og-image.png"],
   },
   twitter: {
     card: "summary_large_image",

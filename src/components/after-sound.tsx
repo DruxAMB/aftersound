@@ -306,9 +306,22 @@ export default function AfterSound() {
       <div ref={containerRef} className="flex min-h-dvh flex-col items-center justify-center bg-black px-6 text-center">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div
-            className="absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+            className="absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full animate-pulse-slow"
             style={{ background: "radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%)" }}
           />
+          {/* Animated equalizer bars — subtle, no audio needed */}
+          <div className="absolute bottom-0 left-0 right-0 flex h-32 items-end justify-center gap-1 opacity-20">
+            {Array.from({ length: 40 }).map((_, i) => (
+              <div
+                key={i}
+                className="w-1 flex-1 animate-eq-bar rounded-full bg-white"
+                style={{
+                  animationDelay: `${i * 0.05}s`,
+                  animationDuration: `${1.5 + (i % 5) * 0.3}s`,
+                }}
+              />
+            ))}
+          </div>
         </div>
 
         <main className="relative z-10 flex flex-col items-center gap-6">
