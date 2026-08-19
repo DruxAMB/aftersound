@@ -408,6 +408,7 @@ export default function AfterSound() {
       : "your room · 5s";
     return (
       <div className="flex min-h-dvh flex-col bg-void-black px-6 py-8">
+        <div className="mx-auto w-full max-w-6xl">
         <header className="flex items-center justify-between">
           <span className="ui-mono text-[14px] text-paper-white/60">
             {activeScene ? `${SCENES.find((s) => s.id === activeScene)?.label} scene` : "Your room"}
@@ -421,7 +422,7 @@ export default function AfterSound() {
           </button>
         </header>
 
-        <main className="flex flex-1 flex-col items-center justify-center gap-10">
+        <main className="flex flex-1 flex-col items-center justify-center gap-10 py-12">
           {/* Live dB readout — Instrument Serif at display scale */}
           <div className="flex flex-col items-center">
             <div
@@ -438,7 +439,7 @@ export default function AfterSound() {
           {/* Spectrum visualization */}
           <SpectrumVisualizer
             analyser={analyser}
-            className="w-full max-w-2xl"
+            className="w-full max-w-3xl"
           />
 
           {/* NIOSH safe daily dose — midnight card */}
@@ -470,6 +471,7 @@ export default function AfterSound() {
             </div>
           </div>
         </main>
+        </div>
       </div>
     );
   }
@@ -480,6 +482,7 @@ export default function AfterSound() {
       : "your room · 5s";
     return (
       <div ref={containerRef} className="flex min-h-dvh flex-col bg-void-black px-6 py-8">
+        <div className="mx-auto w-full max-w-6xl">
         <header className="flex items-center justify-between">
           <span className="ui-mono text-[14px] text-paper-white/60">
             Your reveal
@@ -493,113 +496,124 @@ export default function AfterSound() {
           </button>
         </header>
 
-        <main className="flex flex-1 flex-col items-center justify-center gap-10">
-          {/* Instrument Serif heading — normal style, tight leading */}
-          <h2
-            data-animate="reveal-title"
-            className="heading-serif text-[48px] text-paper-white sm:text-[64px]"
-            style={{ lineHeight: "0.85", textAlign: "center" }}
-          >
-            This is what it<br />could sound like
-          </h2>
-
-          {/* Waveform chip */}
-          <div data-animate="reveal-waveform">
-            <WaveformChip
-              buffer={capturedBuffer}
-              sampleRate={capturedSampleRate}
-              label={captureLabel}
-            />
-          </div>
-
-          {/* A/B playback buttons — primary/secondary style */}
-          <div data-animate="reveal-ab" className="flex flex-col gap-3 sm:flex-row">
-            <button
-              onClick={() => handlePlayback("clean")}
-              disabled={isPlaying}
-              className={playbackMode === "clean" && isPlaying ? "btn-primary" : "btn-secondary"}
+        <main className="flex flex-1 flex-col gap-16 py-12">
+          {/* Hero heading — centered, full width */}
+          <div className="flex flex-col items-center gap-8">
+            <h2
+              data-animate="reveal-title"
+              className="heading-serif text-[48px] text-paper-white sm:text-[64px] md:text-[80px]"
+              style={{ lineHeight: "0.85", textAlign: "center" }}
             >
-              ▶ As you heard it
-            </button>
-            <button
-              onClick={() => handlePlayback("projected")}
-              disabled={isPlaying}
-              className={playbackMode === "projected" && isPlaying ? "btn-primary" : "btn-secondary"}
-            >
-              ▶ After {age} years
-            </button>
-          </div>
+              This is what it<br />could sound like
+            </h2>
 
-          {playbackError && (
-            <p className="ui-mono text-[12px] text-electric-cyan">{playbackError}</p>
-          )}
-
-          {/* Audiogram — midnight card */}
-          <div data-animate="reveal-audiogram" className="flex flex-col items-center gap-3 rounded-cards border border-paper-white/[0.06] bg-midnight-surface px-6 py-5">
-            <p className="ui-mono text-[10px] caption-tracking text-paper-white/40 uppercase">
-              Projected loss · age {age} · {dailyExposure} dBA daily
-            </p>
-            <AudiogramChart audiogram={audiogram} className="w-full max-w-sm" />
-          </div>
-
-          {/* Age and exposure sliders */}
-          <div className="flex w-full max-w-sm flex-col gap-6">
-            <div className="flex flex-col gap-2">
-              <div className="ui-mono flex items-center justify-between text-[12px]">
-                <label htmlFor="age-slider" className="text-paper-white/50">Age</label>
-                <span className="tabular-nums text-electric-cyan">{age}</span>
-              </div>
-              <input
-                id="age-slider"
-                type="range"
-                min={20}
-                max={80}
-                value={age}
-                onChange={(e) => setAge(Number(e.target.value))}
-                className="h-[2px] w-full cursor-pointer appearance-none rounded-[9px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric-cyan"
+            {/* Waveform chip */}
+            <div data-animate="reveal-waveform">
+              <WaveformChip
+                buffer={capturedBuffer}
+                sampleRate={capturedSampleRate}
+                label={captureLabel}
               />
             </div>
-            <div className="flex flex-col gap-2">
-              <div className="ui-mono flex items-center justify-between text-[12px]">
-                <label htmlFor="exposure-slider" className="text-paper-white/50">Daily exposure</label>
-                <span className="tabular-nums text-electric-cyan">{dailyExposure} dBA</span>
-              </div>
-              <input
-                id="exposure-slider"
-                type="range"
-                min={70}
-                max={110}
-                value={dailyExposure}
-                onChange={(e) => setDailyExposure(Number(e.target.value))}
-                className="h-[2px] w-full cursor-pointer appearance-none rounded-[9px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric-cyan"
-              />
-            </div>
-          </div>
 
-          {/* Ear test CTA */}
-          <div className="flex flex-col items-center gap-3 border-t border-paper-white/[0.06] pt-8">
-            {earTestResults.length > 0 && (
-              <p className="ui-mono text-[10px] caption-tracking text-electric-cyan uppercase">
-                ✓ Measured thresholds applied
-              </p>
+            {/* A/B playback buttons */}
+            <div data-animate="reveal-ab" className="flex flex-col gap-3 sm:flex-row">
+              <button
+                onClick={() => handlePlayback("clean")}
+                disabled={isPlaying}
+                className={playbackMode === "clean" && isPlaying ? "btn-primary" : "btn-secondary"}
+              >
+                ▶ As you heard it
+              </button>
+              <button
+                onClick={() => handlePlayback("projected")}
+                disabled={isPlaying}
+                className={playbackMode === "projected" && isPlaying ? "btn-primary" : "btn-secondary"}
+              >
+                ▶ After {age} years
+              </button>
+            </div>
+
+            {playbackError && (
+              <p className="ui-mono text-[12px] text-electric-cyan">{playbackError}</p>
             )}
-            <button
-              onClick={handleStartEarTest}
-              className="btn-secondary"
-            >
-              {earTestResults.length > 0 ? "Retest your hearing" : "Test your actual hearing"}
-            </button>
-            <p className="ui-mono text-[10px] caption-tracking text-paper-white/30">
-              90 seconds · headphones recommended
-            </p>
           </div>
 
-          {/* Honest limits panel — midnight card */}
-          <details className="w-full max-w-md rounded-cards border border-paper-white/[0.06] bg-midnight-surface p-6">
+          {/* Two-column: audiogram (left) + controls (right) */}
+          <div className="flex flex-col gap-8 md:flex-row md:gap-12">
+            {/* Audiogram — left, wider */}
+            <div data-animate="reveal-audiogram" className="flex flex-1 flex-col gap-3 rounded-cards border border-paper-white/[0.06] bg-midnight-surface px-6 py-5">
+              <p className="ui-mono text-[10px] caption-tracking text-paper-white/40 uppercase">
+                Projected loss · age {age} · {dailyExposure} dBA daily
+              </p>
+              <AudiogramChart audiogram={audiogram} className="w-full" />
+            </div>
+
+            {/* Controls — right, narrower */}
+            <div className="flex w-full flex-col gap-8 md:w-[320px] md:shrink-0">
+              {/* Sliders */}
+              <div className="flex flex-col gap-6">
+                <p className="ui-mono text-[10px] caption-tracking text-paper-white/40 uppercase">
+                  Adjust the projection
+                </p>
+                <div className="flex flex-col gap-2">
+                  <div className="ui-mono flex items-center justify-between text-[12px]">
+                    <label htmlFor="age-slider" className="text-paper-white/50">Age</label>
+                    <span className="tabular-nums text-electric-cyan">{age}</span>
+                  </div>
+                  <input
+                    id="age-slider"
+                    type="range"
+                    min={20}
+                    max={80}
+                    value={age}
+                    onChange={(e) => setAge(Number(e.target.value))}
+                    className="h-[2px] w-full cursor-pointer appearance-none rounded-[9px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric-cyan"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <div className="ui-mono flex items-center justify-between text-[12px]">
+                    <label htmlFor="exposure-slider" className="text-paper-white/50">Daily exposure</label>
+                    <span className="tabular-nums text-electric-cyan">{dailyExposure} dBA</span>
+                  </div>
+                  <input
+                    id="exposure-slider"
+                    type="range"
+                    min={70}
+                    max={110}
+                    value={dailyExposure}
+                    onChange={(e) => setDailyExposure(Number(e.target.value))}
+                    className="h-[2px] w-full cursor-pointer appearance-none rounded-[9px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric-cyan"
+                  />
+                </div>
+              </div>
+
+              {/* Ear test CTA */}
+              <div className="flex flex-col items-start gap-3 border-t border-paper-white/[0.06] pt-6">
+                {earTestResults.length > 0 && (
+                  <p className="ui-mono text-[10px] caption-tracking text-electric-cyan uppercase">
+                    ✓ Measured thresholds applied
+                  </p>
+                )}
+                <button
+                  onClick={handleStartEarTest}
+                  className="btn-secondary"
+                >
+                  {earTestResults.length > 0 ? "Retest your hearing" : "Test your actual hearing"}
+                </button>
+                <p className="ui-mono text-[10px] caption-tracking text-paper-white/30">
+                  90 seconds · headphones recommended
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Honest limits — full width */}
+          <details className="w-full rounded-cards border border-paper-white/[0.06] bg-midnight-surface p-6">
             <summary className="ui-mono cursor-pointer text-[10px] caption-tracking text-paper-white/40 uppercase transition-colors hover:text-electric-cyan focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric-cyan">
               What this tool can and can&apos;t do
             </summary>
-            <div className="mt-5 space-y-4 text-[15px] leading-relaxed text-paper-white/50">
+            <div className="mt-5 grid gap-5 md:grid-cols-2 text-[15px] leading-relaxed text-paper-white/50">
               <p>
                 <span className="text-paper-white">Sound level:</span> The dB reading is
                 uncalibrated. Consumer microphones vary ±15-20 dB from professional
@@ -627,12 +641,12 @@ export default function AfterSound() {
             </div>
           </details>
 
-          {/* Closing beat */}
-          <div className="flex w-full max-w-md flex-col items-center gap-4 border-t border-paper-white/[0.06] pt-8 text-center">
-            <p className="heading-serif-italic text-[28px] text-paper-white">
+          {/* Closing beat — centered, wide */}
+          <div className="flex flex-col items-center gap-4 border-t border-paper-white/[0.06] pt-10 text-center">
+            <p className="heading-serif-italic text-[32px] text-paper-white sm:text-[40px]">
               You can&apos;t undo hearing damage.
             </p>
-            <p className="text-[15px] text-paper-white/50 leading-relaxed">
+            <p className="max-w-xl text-[15px] text-paper-white/50 leading-relaxed">
               But you can prevent it. Lower the volume, take breaks, and wear protection
               in loud environments.
             </p>
@@ -641,6 +655,7 @@ export default function AfterSound() {
             </p>
           </div>
         </main>
+        </div>
       </div>
     );
   }
