@@ -151,10 +151,11 @@ export default function EarTest({ audioCtx, onComplete, onBack }: Props) {
     onComplete(results);
   }, [results, onComplete]);
 
-  // GSAP for intro (skipped if reduced motion)
+  // GSAP for intro
   useGSAP(
     () => {
       if (testPhase !== "intro") return;
+      gsap.set("[data-animate='test-intro']", { opacity: 1, y: 0 });
       if (reducedMotion) return;
       gsap.from("[data-animate='test-intro']", {
         y: 20,

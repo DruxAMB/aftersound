@@ -81,6 +81,8 @@ export default function AudiogramChart({ audiogram, className }: Props) {
         // Animate dots in after the line
         if (dotsRef.current) {
           const dots = dotsRef.current.querySelectorAll("circle");
+          // Reset dots to visible first, then animate from hidden
+          gsap.set(dots, { scale: 1, opacity: 1 });
           gsap.from(dots, {
             scale: 0,
             opacity: 0,

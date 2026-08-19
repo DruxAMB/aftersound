@@ -270,10 +270,12 @@ export default function AfterSound() {
     setPhase("revealed");
   }, []);
 
-  // GSAP entrance animation for landing (skipped if reduced motion)
+  // GSAP entrance animation for landing
   useGSAP(
     () => {
       if (phase !== "landing") return;
+      // Reset all animated elements to visible first (prevents stuck opacity:0)
+      gsap.set("[data-animate]", { opacity: 1, y: 0 });
       if (reducedMotion) return;
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
       tl.from("[data-animate='title']", { y: 30, opacity: 0, duration: 0.8 })
@@ -284,10 +286,11 @@ export default function AfterSound() {
     { scope: containerRef, dependencies: [phase, reducedMotion] },
   );
 
-  // GSAP entrance for revealed phase (skipped if reduced motion)
+  // GSAP entrance for revealed phase
   useGSAP(
     () => {
       if (phase !== "revealed") return;
+      gsap.set("[data-animate]", { opacity: 1, y: 0 });
       if (reducedMotion) return;
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
       tl.from("[data-animate='reveal-title']", { y: 20, opacity: 0, duration: 0.6 })
