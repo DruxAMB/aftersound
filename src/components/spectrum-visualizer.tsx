@@ -43,7 +43,13 @@ export default function SpectrumVisualizer({ analyser, className }: Props) {
     analyzerRef.current = audioMotion;
 
     return () => {
-      audioMotion.destroy();
+      // destroy() may throw if the analyser was already disconnected
+      // by the SoundLevelMeter cleanup — wrap in try/catch
+      try {
+        audioMotion.destroy();
+      } catch {
+        // analyser already disconnected, nothing to clean up
+      }
       analyzerRef.current = null;
     };
   }, [analyser]);
