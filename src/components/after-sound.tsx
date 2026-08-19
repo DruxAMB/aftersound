@@ -7,6 +7,7 @@ import { SoundLevelMeter, type LevelData } from "@/lib/audio/meter";
 import { allowedTime, formatDuration } from "@/lib/audio/niosh";
 import { createScene, type SceneId } from "@/lib/audio/scenes";
 import SpectrumVisualizer from "@/components/spectrum-visualizer";
+import WaveformChip from "@/components/waveform-chip";
 
 gsap.registerPlugin(useGSAP);
 
@@ -18,12 +19,17 @@ const SCENES: { id: SceneId; label: string }[] = [
   { id: "gym", label: "Gym" },
 ];
 
+const CAPTURE_DURATION = 5; // seconds
+
 export default function AfterSound() {
   const [phase, setPhase] = useState<Phase>("landing");
   const [error, setError] = useState<string | null>(null);
   const [laeq, setLaeq] = useState<number | null>(null);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [activeScene, setActiveScene] = useState<SceneId | null>(null);
+  const [capturedBuffer, setCapturedBuffer] = useState<Float32Array | null>(null);
+  const [capturedSampleRate, setCapturedSampleRate] = useState<number>(44100);
+  const [captureProgress, setCaptureProgress] = useState<number>(0);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const meterRef = useRef<SoundLevelMeter | null>(null);
@@ -31,6 +37,7 @@ export default function AfterSound() {
   const sceneCtxRef = useRef<AudioContext | null>(null);
   const latestLevelRef = useRef<LevelData | null>(null);
   const rafRef = useRef<number | null>(null);
+  const captureStartTimeRef = useRef<number>(0);
 
   // Throttled state updates from AudioWorklet (60fps max)
   useEffect(() => {
@@ -39,6 +46,12 @@ export default function AfterSound() {
       const data = latestLevelRef.current;
       if (data && isFinite(data.laeq)) {
         setLaeq(data.laeq);
+      }
+      // Update capture progress
+      if (captureStartTimeRef.current > 0) {
+        const elapsed = (performance.now() - captureStartTimeRef.current) / 1000;
+        const progress = Math.min(100, (elapsed / CAPTURE_DURATION) * 100);
+        setCaptureProgress(progress);
       }
       rafRef.current = requestAnimationFrame(tick);
     };
@@ -71,6 +84,9 @@ export default function AfterSound() {
     setAnalyser(null);
     setLaeq(null);
     setActiveScene(null);
+    setCapturedBuffer(null);
+    setCaptureProgress(0);
+    captureStartTimeRef.current = 0;
   }, []);
 
   const startMeter = useCallback(
@@ -79,11 +95,20 @@ export default function AfterSound() {
         onLevel: (data) => {
           latestLevelRef.current = data;
         },
+        onCaptured: (buffer, sampleRate) => {
+          setCapturedBuffer(buffer);
+          setCapturedSampleRate(sampleRate);
+          // Auto-advance to captured phase
+          setPhase("captured");
+        },
       });
       meterRef.current = meter;
       await meter.startFromStream(stream, ctx);
       setAnalyser(meter.getAnalyser());
       setPhase("listening");
+      // Start capture immediately
+      meter.startCapture(CAPTURE_DURATION);
+      captureStartTimeRef.current = performance.now();
     },
     [],
   );
@@ -205,6 +230,9 @@ export default function AfterSound() {
 
   if (phase === "listening") {
     const safeTime = laeq != null ? allowedTime(laeq) : null;
+    const captureLabel = activeScene
+      ? `${SCENES.find((s) => s.id === activeScene)?.label} · 5s`
+      : "your room · 5s";
     return (
       <div className="flex min-h-dvh flex-col bg-black px-6 py-8">
         <header className="flex items-center justify-between">
@@ -249,23 +277,19 @@ export default function AfterSound() {
             </p>
           </div>
 
-          {/* Scene switcher (visible when in a scene or as fallback) */}
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-xs text-zinc-600">Switch scene</p>
-            <div className="flex gap-2">
-              {SCENES.map((scene) => (
-                <button
-                  key={scene.id}
-                  onClick={() => handleScene(scene.id)}
-                  className={`h-8 rounded-full px-4 text-xs transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${
-                    activeScene === scene.id
-                      ? "bg-white text-black"
-                      : "border border-white/15 text-zinc-400 hover:border-white/30 hover:text-white"
-                  }`}
-                >
-                  {scene.label}
-                </button>
-              ))}
+          {/* Capture progress */}
+          <div className="flex w-full max-w-xs flex-col items-center gap-2">
+            <div className="flex items-center justify-between text-xs text-zinc-500">
+              <span>Capturing {captureLabel}</span>
+              <span className="tabular-nums">
+                {Math.ceil(CAPTURE_DURATION - (captureProgress / 100) * CAPTURE_DURATION)}s
+              </span>
+            </div>
+            <div className="h-1 w-full overflow-hidden rounded-full bg-white/10">
+              <div
+                className="h-full rounded-full bg-white transition-[width] duration-100 ease-linear"
+                style={{ width: `${captureProgress}%` }}
+              />
             </div>
           </div>
         </main>
@@ -273,7 +297,35 @@ export default function AfterSound() {
     );
   }
 
-  // Placeholder for subsequent phases — will be built in steps 3–7
+  if (phase === "captured") {
+    const captureLabel = activeScene
+      ? `${SCENES.find((s) => s.id === activeScene)?.label} · 5s`
+      : "your room · 5s";
+    return (
+      <div className="flex min-h-dvh flex-col bg-black px-6 py-8">
+        <header className="flex items-center justify-between">
+          <span className="text-sm font-medium text-zinc-500">Captured</span>
+          <button
+            onClick={handleStop}
+            className="h-9 rounded-full border border-white/15 px-4 text-sm text-zinc-400 transition-all hover:border-white/30 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            Start over
+          </button>
+        </header>
+
+        <main className="flex flex-1 flex-col items-center justify-center gap-8">
+          <WaveformChip
+            buffer={capturedBuffer}
+            sampleRate={capturedSampleRate}
+            label={captureLabel}
+          />
+          <p className="text-sm text-zinc-500">Preparing your reveal…</p>
+        </main>
+      </div>
+    );
+  }
+
+  // Placeholder for subsequent phases — will be built in steps 4–7
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-black px-6 text-center text-white">
       <p className="text-zinc-400">Building…</p>

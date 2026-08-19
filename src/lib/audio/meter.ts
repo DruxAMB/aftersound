@@ -19,6 +19,7 @@ export type LevelData = {
 export type MeterCallbacks = {
   onLevel?: (data: LevelData) => void;
   onError?: (error: Error) => void;
+  onCaptured?: (buffer: Float32Array, sampleRate: number) => void;
 };
 
 // A-weighting biquad filter parameters
@@ -33,6 +34,7 @@ export class SoundLevelMeter {
   private biquads: BiquadFilterNode[] = [];
   private analyser: AnalyserNode | null = null;
   private workletNode: AudioWorkletNode | null = null;
+  private captureNode: AudioWorkletNode | null = null;
   private stream: MediaStream | null = null;
   private callbacks: MeterCallbacks;
   private running = false;
@@ -53,8 +55,9 @@ export class SoundLevelMeter {
     this.audioCtx = audioCtx;
     this.ownsAudioCtx = !externalCtx;
 
-    // Load the SPL meter AudioWorklet
+    // Load the SPL meter and capture AudioWorklets
     await audioCtx.audioWorklet.addModule("/worklets/spl-meter-processor.js");
+    await audioCtx.audioWorklet.addModule("/worklets/capture-processor.js");
 
     // Create source from stream
     this.source = audioCtx.createMediaStreamSource(stream);
@@ -83,7 +86,16 @@ export class SoundLevelMeter {
       }
     };
 
-    // Connect: source → biquads → analyser → worklet
+    // Create capture worklet (taps raw source, before A-weighting)
+    this.captureNode = new AudioWorkletNode(audioCtx, "capture");
+    this.captureNode.port.onmessage = (e) => {
+      if (e.data?.type === "captured" && this.callbacks.onCaptured) {
+        this.callbacks.onCaptured(e.data.buffer, e.data.sampleRate);
+      }
+    };
+
+    // Connect: source → biquads → analyser → worklet (for SPL)
+    // Also: source → capture worklet (for raw audio capture)
     let node: AudioNode = this.source;
     for (const bq of this.biquads) {
       node.connect(bq);
@@ -91,6 +103,7 @@ export class SoundLevelMeter {
     }
     node.connect(this.analyser);
     this.analyser.connect(this.workletNode);
+    this.source.connect(this.captureNode);
 
     // Resume context (in case it's suspended)
     if (audioCtx.state === "suspended") {
@@ -175,6 +188,23 @@ export class SoundLevelMeter {
   }
 
   /**
+   * Start capturing raw audio for the given duration (seconds).
+   * The onCaptured callback fires when the buffer is complete.
+   */
+  startCapture(duration: number) {
+    if (this.captureNode) {
+      this.captureNode.port.postMessage({ type: "start", duration });
+    }
+  }
+
+  /**
+   * Get the AudioContext (for creating AudioBuffers from captured data).
+   */
+  getAudioContext(): AudioContext | null {
+    return this.audioCtx;
+  }
+
+  /**
    * Stop and clean up all audio resources.
    */
   stop() {
@@ -185,6 +215,11 @@ export class SoundLevelMeter {
     if (this.stream) {
       this.stream.getTracks().forEach((t) => t.stop());
       this.stream = null;
+    }
+    if (this.captureNode) {
+      this.captureNode.port.onmessage = null;
+      this.captureNode.disconnect();
+      this.captureNode = null;
     }
     if (this.workletNode) {
       this.workletNode.port.onmessage = null;
