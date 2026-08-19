@@ -521,6 +521,53 @@ export default function AfterSound() {
             </button>
             <p className="text-xs text-zinc-600">90 seconds · headphones recommended</p>
           </div>
+
+          {/* Honest limits panel */}
+          <details className="w-full max-w-md rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+            <summary className="cursor-pointer text-sm font-medium text-zinc-400 transition-colors hover:text-zinc-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+              What this tool can and can&apos;t do
+            </summary>
+            <div className="mt-4 space-y-3 text-xs leading-5 text-zinc-500">
+              <p>
+                <span className="text-zinc-300">Sound level:</span> The dB reading is
+                uncalibrated. Consumer microphones vary ±15-20 dB from professional
+                equipment. Use it to compare environments, not as an absolute measurement.
+              </p>
+              <p>
+                <span className="text-zinc-300">Hearing loss projection:</span> The NIPTS
+                model is our own approximation, not the ISO 1999 standard (which is
+                paywalled). It captures the general shape of noise-induced hearing loss
+                (the 4 kHz notch, logarithmic age growth) but should not be used for risk
+                assessment. For that, see an audiologist.
+              </p>
+              <p>
+                <span className="text-zinc-300">Ear test:</span> This is not a clinical
+                audiometer. Results depend on your headphones, background noise, and
+                response honesty. Calibrated audiometric equipment in a sound-treated booth
+                is the only way to get a real threshold.
+              </p>
+              <p>
+                <span className="text-zinc-300">Resynthesis:</span> The &quot;after N years&quot;
+                playback models hearing loss as frequency attenuation and spectral smearing.
+                Real hearing loss also involves reduced dynamic range, temporal smearing,
+                and tinnitus — which this tool does not simulate.
+              </p>
+            </div>
+          </details>
+
+          {/* Closing beat */}
+          <div className="flex w-full max-w-md flex-col items-center gap-3 border-t border-white/10 pt-6 text-center">
+            <p className="text-base text-zinc-300">
+              You can&apos;t undo hearing damage.
+            </p>
+            <p className="text-sm text-zinc-500">
+              But you can prevent it. Lower the volume, take breaks, and wear protection
+              in loud environments.
+            </p>
+            <p className="text-xs text-zinc-600">
+              NIOSH recommends 85 dBA max for 8 hours. 3 dB louder = half the safe time.
+            </p>
+          </div>
         </main>
       </div>
     );
@@ -537,16 +584,6 @@ export default function AfterSound() {
     );
   }
 
-  // Placeholder for step 7 — will be built next
-  return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-black px-6 text-center text-white">
-      <p className="text-zinc-400">Building…</p>
-      <button
-        onClick={handleStop}
-        className="mt-6 h-10 rounded-full border border-white/15 px-5 text-sm text-zinc-300 transition-all hover:border-white/30 hover:text-white"
-      >
-        Back
-      </button>
-    </div>
-  );
+  // Fallback — should not be reached
+  return null;
 }
