@@ -205,6 +205,45 @@ export class SoundLevelMeter {
   }
 
   /**
+   * Detach the AudioContext from the meter (for handoff to ResynthesisEngine).
+   * Stops the source and disconnects all nodes, but does NOT close the context.
+   * Returns the AudioContext for reuse, or null if not available.
+   */
+  detachAudioContext(): AudioContext | null {
+    const ctx = this.audioCtx;
+    if (this.stream) {
+      this.stream.getTracks().forEach((t) => t.stop());
+      this.stream = null;
+    }
+    if (this.captureNode) {
+      this.captureNode.port.onmessage = null;
+      this.captureNode.disconnect();
+      this.captureNode = null;
+    }
+    if (this.workletNode) {
+      this.workletNode.port.onmessage = null;
+      this.workletNode.disconnect();
+      this.workletNode = null;
+    }
+    if (this.analyser) {
+      this.analyser.disconnect();
+      this.analyser = null;
+    }
+    for (const bq of this.biquads) {
+      bq.disconnect();
+    }
+    this.biquads = [];
+    if (this.source) {
+      this.source.disconnect();
+      this.source = null;
+    }
+    this.audioCtx = null;
+    this.ownsAudioCtx = false;
+    this.running = false;
+    return ctx;
+  }
+
+  /**
    * Stop and clean up all audio resources.
    */
   stop() {

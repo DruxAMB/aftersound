@@ -6,12 +6,15 @@ import { useGSAP } from "@gsap/react";
 import { SoundLevelMeter, type LevelData } from "@/lib/audio/meter";
 import { allowedTime, formatDuration } from "@/lib/audio/niosh";
 import { createScene, type SceneId } from "@/lib/audio/scenes";
+import { computeAudiogram, DEFAULT_AGE, DEFAULT_DAILY_EXPOSURE, type Audiogram } from "@/lib/audio/nipts";
+import { ResynthesisEngine, type PlaybackMode } from "@/lib/audio/resynthesis";
 import SpectrumVisualizer from "@/components/spectrum-visualizer";
 import WaveformChip from "@/components/waveform-chip";
+import AudiogramChart from "@/components/audiogram-chart";
 
 gsap.registerPlugin(useGSAP);
 
-type Phase = "landing" | "listening" | "captured" | "revealed" | "testing";
+type Phase = "landing" | "listening" | "revealed" | "testing";
 
 const SCENES: { id: SceneId; label: string }[] = [
   { id: "subway", label: "Subway" },
@@ -30,11 +33,17 @@ export default function AfterSound() {
   const [capturedBuffer, setCapturedBuffer] = useState<Float32Array | null>(null);
   const [capturedSampleRate, setCapturedSampleRate] = useState<number>(44100);
   const [captureProgress, setCaptureProgress] = useState<number>(0);
+  const [audiogram, setAudiogram] = useState<Audiogram | null>(null);
+  const [playbackMode, setPlaybackMode] = useState<PlaybackMode | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [age, setAge] = useState(DEFAULT_AGE);
+  const [dailyExposure, setDailyExposure] = useState(DEFAULT_DAILY_EXPOSURE);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const meterRef = useRef<SoundLevelMeter | null>(null);
   const sceneStopRef = useRef<(() => void) | null>(null);
   const sceneCtxRef = useRef<AudioContext | null>(null);
+  const resynthesisRef = useRef<ResynthesisEngine | null>(null);
   const latestLevelRef = useRef<LevelData | null>(null);
   const rafRef = useRef<number | null>(null);
   const captureStartTimeRef = useRef<number>(0);
@@ -61,14 +70,28 @@ export default function AfterSound() {
     };
   }, [phase]);
 
+  // Recompute audiogram when age or exposure changes (in revealed phase)
+  useEffect(() => {
+    if (phase !== "revealed") return;
+    const newAudiogram = computeAudiogram(age, dailyExposure);
+    setAudiogram(newAudiogram);
+    if (resynthesisRef.current) {
+      resynthesisRef.current.setAudiogram(newAudiogram);
+    }
+  }, [phase, age, dailyExposure]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      stopMeter();
+      stopAll();
     };
   }, []);
 
-  const stopMeter = useCallback(() => {
+  const stopAll = useCallback(() => {
+    if (resynthesisRef.current) {
+      resynthesisRef.current.destroy();
+      resynthesisRef.current = null;
+    }
     if (meterRef.current) {
       meterRef.current.stop();
       meterRef.current = null;
@@ -86,6 +109,9 @@ export default function AfterSound() {
     setActiveScene(null);
     setCapturedBuffer(null);
     setCaptureProgress(0);
+    setAudiogram(null);
+    setPlaybackMode(null);
+    setIsPlaying(false);
     captureStartTimeRef.current = 0;
   }, []);
 
@@ -98,8 +124,22 @@ export default function AfterSound() {
         onCaptured: (buffer, sampleRate) => {
           setCapturedBuffer(buffer);
           setCapturedSampleRate(sampleRate);
-          // Auto-advance to captured phase
-          setPhase("captured");
+          // Hand off audio context to resynthesis engine
+          const audioCtx = meter.detachAudioContext();
+          meterRef.current = null;
+          if (sceneStopRef.current) {
+            sceneStopRef.current();
+            sceneStopRef.current = null;
+          }
+          if (audioCtx) {
+            const engine = new ResynthesisEngine(audioCtx);
+            engine.loadCapturedAudio(buffer, sampleRate);
+            const newAudiogram = computeAudiogram(age, dailyExposure);
+            engine.setAudiogram(newAudiogram);
+            resynthesisRef.current = engine;
+            setAudiogram(newAudiogram);
+          }
+          setPhase("revealed");
         },
       });
       meterRef.current = meter;
@@ -110,12 +150,12 @@ export default function AfterSound() {
       meter.startCapture(CAPTURE_DURATION);
       captureStartTimeRef.current = performance.now();
     },
-    [],
+    [age, dailyExposure],
   );
 
   const handleListen = useCallback(async () => {
     setError(null);
-    stopMeter();
+    stopAll();
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
@@ -129,12 +169,12 @@ export default function AfterSound() {
         setError("Could not access microphone. Try a sample scene below.");
       }
     }
-  }, [startMeter, stopMeter]);
+  }, [startMeter, stopAll]);
 
   const handleScene = useCallback(
     async (sceneId: SceneId) => {
       setError(null);
-      stopMeter();
+      stopAll();
       try {
         const ctx = new AudioContext();
         sceneCtxRef.current = ctx;
@@ -149,13 +189,30 @@ export default function AfterSound() {
         setError("Could not start scene audio.");
       }
     },
-    [startMeter, stopMeter],
+    [startMeter, stopAll],
   );
 
   const handleStop = useCallback(() => {
-    stopMeter();
+    stopAll();
     setPhase("landing");
-  }, [stopMeter]);
+  }, [stopAll]);
+
+  const handlePlayback = useCallback(
+    async (mode: PlaybackMode) => {
+      if (!resynthesisRef.current) return;
+      // Stop current playback if any
+      resynthesisRef.current.stop();
+      setPlaybackMode(mode);
+      setIsPlaying(true);
+      try {
+        await resynthesisRef.current.play(mode);
+      } catch {
+        // playback error
+      }
+      setIsPlaying(false);
+    },
+    [],
+  );
 
   // GSAP entrance animation for landing
   useGSAP(
@@ -166,6 +223,19 @@ export default function AfterSound() {
         .from("[data-animate='tagline']", { y: 20, opacity: 0, duration: 0.6 }, "-=0.4")
         .from("[data-animate='cta']", { y: 16, opacity: 0, duration: 0.5 }, "-=0.3")
         .from("[data-animate='scene-btn']", { y: 12, opacity: 0, duration: 0.4, stagger: 0.08 }, "-=0.2");
+    },
+    { scope: containerRef, dependencies: [phase] },
+  );
+
+  // GSAP entrance for revealed phase
+  useGSAP(
+    () => {
+      if (phase !== "revealed") return;
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      tl.from("[data-animate='reveal-title']", { y: 20, opacity: 0, duration: 0.6 })
+        .from("[data-animate='reveal-waveform']", { y: 16, opacity: 0, duration: 0.5 }, "-=0.3")
+        .from("[data-animate='reveal-ab']", { y: 16, opacity: 0, duration: 0.5 }, "-=0.3")
+        .from("[data-animate='reveal-audiogram']", { y: 16, opacity: 0, duration: 0.5 }, "-=0.3");
     },
     { scope: containerRef, dependencies: [phase] },
   );
@@ -297,14 +367,14 @@ export default function AfterSound() {
     );
   }
 
-  if (phase === "captured") {
+  if (phase === "revealed") {
     const captureLabel = activeScene
       ? `${SCENES.find((s) => s.id === activeScene)?.label} · 5s`
       : "your room · 5s";
     return (
-      <div className="flex min-h-dvh flex-col bg-black px-6 py-8">
+      <div ref={containerRef} className="flex min-h-dvh flex-col bg-black px-6 py-8">
         <header className="flex items-center justify-between">
-          <span className="text-sm font-medium text-zinc-500">Captured</span>
+          <span className="text-sm font-medium text-zinc-500">Your reveal</span>
           <button
             onClick={handleStop}
             className="h-9 rounded-full border border-white/15 px-4 text-sm text-zinc-400 transition-all hover:border-white/30 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
@@ -314,18 +384,92 @@ export default function AfterSound() {
         </header>
 
         <main className="flex flex-1 flex-col items-center justify-center gap-8">
-          <WaveformChip
-            buffer={capturedBuffer}
-            sampleRate={capturedSampleRate}
-            label={captureLabel}
-          />
-          <p className="text-sm text-zinc-500">Preparing your reveal…</p>
+          <h2 data-animate="reveal-title" className="text-2xl font-semibold text-white sm:text-3xl">
+            This is what it could sound like
+          </h2>
+
+          {/* Waveform chip */}
+          <div data-animate="reveal-waveform">
+            <WaveformChip
+              buffer={capturedBuffer}
+              sampleRate={capturedSampleRate}
+              label={captureLabel}
+            />
+          </div>
+
+          {/* A/B playback buttons */}
+          <div data-animate="reveal-ab" className="flex gap-3">
+            <button
+              onClick={() => handlePlayback("clean")}
+              disabled={isPlaying}
+              className={`h-12 rounded-full px-6 text-sm font-medium transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:opacity-50 ${
+                playbackMode === "clean" && isPlaying
+                  ? "bg-white text-black"
+                  : "border border-white/15 text-zinc-300 hover:border-white/30 hover:text-white"
+              }`}
+            >
+              ▶ As you heard it
+            </button>
+            <button
+              onClick={() => handlePlayback("projected")}
+              disabled={isPlaying}
+              className={`h-12 rounded-full px-6 text-sm font-medium transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:opacity-50 ${
+                playbackMode === "projected" && isPlaying
+                  ? "bg-white text-black"
+                  : "border border-white/15 text-zinc-300 hover:border-white/30 hover:text-white"
+              }`}
+            >
+              ▶ After {age} years
+            </button>
+          </div>
+
+          {/* Audiogram */}
+          <div data-animate="reveal-audiogram" className="flex flex-col items-center gap-2">
+            <p className="text-sm text-zinc-500">
+              Projected hearing loss at age {age} · {dailyExposure} dBA daily
+            </p>
+            <AudiogramChart audiogram={audiogram} className="w-full max-w-sm" />
+          </div>
+
+          {/* Age and exposure sliders */}
+          <div className="flex w-full max-w-sm flex-col gap-4">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center justify-between text-sm">
+                <label htmlFor="age-slider" className="text-zinc-400">Age</label>
+                <span className="tabular-nums text-white">{age}</span>
+              </div>
+              <input
+                id="age-slider"
+                type="range"
+                min={20}
+                max={80}
+                value={age}
+                onChange={(e) => setAge(Number(e.target.value))}
+                className="h-1 w-full cursor-pointer appearance-none rounded-full bg-white/15 accent-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center justify-between text-sm">
+                <label htmlFor="exposure-slider" className="text-zinc-400">Daily exposure</label>
+                <span className="tabular-nums text-white">{dailyExposure} dBA</span>
+              </div>
+              <input
+                id="exposure-slider"
+                type="range"
+                min={70}
+                max={110}
+                value={dailyExposure}
+                onChange={(e) => setDailyExposure(Number(e.target.value))}
+                className="h-1 w-full cursor-pointer appearance-none rounded-full bg-white/15 accent-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              />
+            </div>
+          </div>
         </main>
       </div>
     );
   }
 
-  // Placeholder for subsequent phases — will be built in steps 4–7
+  // Placeholder for subsequent phases — will be built in steps 6–7
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-black px-6 text-center text-white">
       <p className="text-zinc-400">Building…</p>

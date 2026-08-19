@@ -1,10 +1,13 @@
 /**
  * NIPTS — Noise-Induced Permanent Threshold Shift projection model.
  *
- * Based on NIOSH criteria document DHHS 98-126 (public domain).
- * The exact ISO 1999 model is paywalled; this is an approximation using
- * the published NIOSH formula structure with coefficients calibrated to
- * produce realistic NIPTS values consistent with NIOSH Table 5-1.
+ * DISCLAIMER: This is an illustrative approximation, NOT a clinical model.
+ * The authoritative model is ISO 1999:2013 (paywalled). NIOSH DHHS 98-126
+ * (public domain) references ISO 1999 but does not publish a closed-form
+ * formula. The formula below is our own construction, tuned to produce
+ * values broadly consistent with published NIPTS data (e.g. ~10-15 dB
+ * at 4 kHz for 40 years of 85 dBA exposure, 50th percentile). It is
+ * suitable for a demo/educational tool, not for risk assessment.
  *
  * Model:
  *   NIPTS(f, t, L) = a(f) * ln(1 + t) * max(0, L - 75) / 10
@@ -13,7 +16,7 @@
  *   f = audiometric frequency (Hz)
  *   t = age in years (proxy for years of exposure)
  *   L = daily A-weighted noise exposure level (dBA)
- *   a(f) = frequency-dependent susceptibility coefficient
+ *   a(f) = frequency-dependent susceptibility coefficient (tuned by us)
  *
  * Key characteristics captured:
  * - 4 kHz notch (maximum damage at 3-6 kHz)
@@ -22,10 +25,12 @@
  * - Zero NIPTS below 75 dBA
  *
  * Limitations:
+ * - Formula structure is our invention, not from any published standard
  * - Uses age as proxy for years of exposure (assumes exposure from birth)
  * - Does not separate presbycusis (age-related) from NIPTS
  * - Coefficients are approximate, not from ISO 1999 tables
  * - Does not account for individual susceptibility variability
+ * - NOT FOR CLINICAL OR RISK ASSESSMENT USE
  */
 
 // Audiometric frequencies (Hz)
