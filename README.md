@@ -6,7 +6,7 @@ AfterSound measures the noise around you, projects your hearing forward, and
 replays five seconds of your own audio through your projected future ears —
 so the damage is audible before it's irreversible.
 
-**Live demo:** https://aftersound-fawn.vercel.app
+**Live demo:** https://aftersound.druxamb.dev
 
 ![AfterSound on desktop](docs-desktop.png)
 

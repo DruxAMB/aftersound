@@ -21,7 +21,7 @@ const dmMono = DM_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://aftersound-fawn.vercel.app"),
+  metadataBase: new URL("https://aftersound.druxamb.dev"),
   title: "AfterSound — hear the damage before it happens",
   description:
     "Measure your room, project your hearing, and hear five seconds of your world through your future ears.",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     description:
       "Measure your room, project your hearing, and hear five seconds of your world through your future ears.",
     type: "website",
-    url: "https://aftersound-fawn.vercel.app",
+    url: "https://aftersound.druxamb.dev",
     siteName: "AfterSound",
     images: ["/og-image.png"],
   },
