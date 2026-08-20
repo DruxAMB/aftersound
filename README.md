@@ -8,6 +8,10 @@ so the damage is audible before it's irreversible.
 
 **Live demo:** https://aftersound-fawn.vercel.app
 
+![AfterSound on desktop](docs-desktop.png)
+
+![AfterSound on mobile](docs-mobile.png)
+
 ## What it does
 
 1. **Measure your room** — Click "Listen to your room" (or try a sample scene).
