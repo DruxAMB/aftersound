@@ -44,7 +44,11 @@ each audiometric frequency using a formula tuned to produce values
 consistent with NIOSH 98-126 data. The resynthesis engine applies the
 audiogram as a multiband biquad peaking filter chain, with Q widening to
 model spectral smearing (loss of cochlear frequency selectivity), plus a
-highshelf and dynamic lowpass for broad high-frequency rolloff.
+highshelf and dynamic lowpass for broad high-frequency rolloff. When
+average loss exceeds 15 dB, a tinnitus layer is mixed in: a faint 4 kHz
+pure tone (the most common tinnitus pitch in noise-induced hearing loss)
+plus low-level broadband noise simulating the raised noise floor and
+reduced dynamic range that accompany cochlear damage.
 
 **Disclaimer:** The NIPTS formula is our own approximation, not the ISO
 1999 standard (which is paywalled). It captures the general shape of
@@ -86,9 +90,10 @@ no API keys, no accounts.
   ISO 1999. Not for clinical or risk assessment use.
 - **Ear test:** Not a clinical audiometer. Results depend on headphones and
   environment. See an audiologist for real assessment.
-- **Resynthesis:** Models frequency attenuation and spectral smearing. Real
-  hearing loss also involves reduced dynamic range, temporal smearing, and
-  tinnitus — not simulated here.
+- **Resynthesis:** Models frequency attenuation, spectral smearing, tinnitus
+  (4 kHz ringing), and reduced dynamic range (raised noise floor). Real
+  hearing loss also involves temporal smearing and loudness recruitment —
+  not simulated here.
 
 ## AI assistance disclosure
 
