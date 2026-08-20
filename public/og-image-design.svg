@@ -1,0 +1,86 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="45%" r="40%">
+      <stop offset="0%" stop-color="#19d0e8" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#19d0e8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="wordmarkGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#c0c0c0" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#c0c0c0" stop-opacity="0.03"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#121212"/>
+
+  <!-- Cyan glow -->
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- Ghost wordmark -->
+  <text x="600" y="380" text-anchor="middle"
+    font-family="Georgia, serif" font-style="italic" font-size="280"
+    fill="url(#wordmarkGrad)" letter-spacing="-8">AfterSound</text>
+
+  <!-- EQ bars at bottom -->
+  <g opacity="0.12" fill="#f2f0ed">
+    <rect x="100" y="580" width="3" height="20" rx="1.5"/>
+    <rect x="110" y="570" width="3" height="30" rx="1.5"/>
+    <rect x="120" y="560" width="3" height="40" rx="1.5"/>
+    <rect x="130" y="575" width="3" height="25" rx="1.5"/>
+    <rect x="140" y="565" width="3" height="35" rx="1.5"/>
+    <rect x="150" y="555" width="3" height="45" rx="1.5"/>
+    <rect x="160" y="570" width="3" height="30" rx="1.5"/>
+    <rect x="170" y="580" width="3" height="20" rx="1.5"/>
+    <rect x="180" y="565" width="3" height="35" rx="1.5"/>
+    <rect x="190" y="555" width="3" height="45" rx="1.5"/>
+    <rect x="200" y="570" width="3" height="30" rx="1.5"/>
+    <rect x="210" y="580" width="3" height="20" rx="1.5"/>
+    <rect x="220" y="560" width="3" height="40" rx="1.5"/>
+    <rect x="230" y="575" width="3" height="25" rx="1.5"/>
+    <rect x="240" y="565" width="3" height="35" rx="1.5"/>
+    <rect x="250" y="555" width="3" height="45" rx="1.5"/>
+    <rect x="260" y="570" width="3" height="30" rx="1.5"/>
+    <rect x="270" y="580" width="3" height="20" rx="1.5"/>
+    <rect x="930" y="580" width="3" height="20" rx="1.5"/>
+    <rect x="940" y="570" width="3" height="30" rx="1.5"/>
+    <rect x="950" y="560" width="3" height="40" rx="1.5"/>
+    <rect x="960" y="575" width="3" height="25" rx="1.5"/>
+    <rect x="970" y="565" width="3" height="35" rx="1.5"/>
+    <rect x="980" y="555" width="3" height="45" rx="1.5"/>
+    <rect x="990" y="570" width="3" height="30" rx="1.5"/>
+    <rect x="1000" y="580" width="3" height="20" rx="1.5"/>
+    <rect x="1010" y="565" width="3" height="35" rx="1.5"/>
+    <rect x="1020" y="555" width="3" height="45" rx="1.5"/>
+    <rect x="1030" y="570" width="3" height="30" rx="1.5"/>
+    <rect x="1040" y="580" width="3" height="20" rx="1.5"/>
+    <rect x="1050" y="560" width="3" height="40" rx="1.5"/>
+    <rect x="1060" y="575" width="3" height="25" rx="1.5"/>
+    <rect x="1070" y="565" width="3" height="35" rx="1.5"/>
+    <rect x="1080" y="555" width="3" height="45" rx="1.5"/>
+    <rect x="1090" y="570" width="3" height="30" rx="1.5"/>
+    <rect x="1100" y="580" width="3" height="20" rx="1.5"/>
+  </g>
+
+  <!-- DM Mono caption -->
+  <text x="600" y="180" text-anchor="middle"
+    font-family="monospace" font-size="14" letter-spacing="2.5"
+    fill="#f2f0ed" opacity="0.5">HEARING · PROJECTION · RESYNTHESIS</text>
+
+  <!-- Headline — Instrument Serif -->
+  <text x="600" y="290" text-anchor="middle"
+    font-family="Georgia, serif" font-size="72" letter-spacing="-2"
+    fill="#f2f0ed">You can't hear the</text>
+  <text x="600" y="360" text-anchor="middle"
+    font-family="Georgia, serif" font-size="72" letter-spacing="-2"
+    fill="#f2f0ed">damage happening.</text>
+
+  <!-- Cyan accent -->
+  <text x="600" y="420" text-anchor="middle"
+    font-family="Georgia, serif" font-style="italic" font-size="32"
+    fill="#19d0e8">Now you can.</text>
+
+  <!-- Bottom URL -->
+  <text x="600" y="540" text-anchor="middle"
+    font-family="monospace" font-size="12" letter-spacing="1.5"
+    fill="#f2f0ed" opacity="0.3">aftersound-fawn.vercel.app</text>
+</svg>

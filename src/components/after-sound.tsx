@@ -496,9 +496,9 @@ export default function AfterSound() {
           </button>
         </header>
 
-        <main className="flex flex-1 flex-col gap-16 py-12">
+        <main className="flex flex-1 flex-col gap-10 py-10">
           {/* Hero heading — centered, full width */}
-          <div className="flex flex-col items-center gap-8">
+          <div className="flex flex-col items-center gap-6">
             <h2
               data-animate="reveal-title"
               className="heading-serif text-[48px] text-paper-white sm:text-[64px] md:text-[80px]"
@@ -634,9 +634,10 @@ export default function AfterSound() {
               </p>
               <p>
                 <span className="text-paper-white">Resynthesis:</span> The &quot;after N years&quot;
-                playback models hearing loss as frequency attenuation and spectral smearing.
-                Real hearing loss also involves reduced dynamic range, temporal smearing,
-                and tinnitus — which this tool does not simulate.
+                playback models hearing loss as frequency attenuation, spectral smearing,
+                and — when loss is significant — tinnitus (a faint 4kHz ringing) plus a
+                raised noise floor (reduced dynamic range). Real hearing loss also involves
+                temporal smearing and loudness recruitment, which this tool does not simulate.
               </p>
             </div>
           </details>
