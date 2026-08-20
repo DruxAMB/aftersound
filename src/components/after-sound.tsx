@@ -12,7 +12,6 @@ import SpectrumVisualizer from "@/components/spectrum-visualizer";
 import WaveformChip from "@/components/waveform-chip";
 import AudiogramChart from "@/components/audiogram-chart";
 import EarTest from "@/components/ear-test";
-import HeroParticles from "@/components/hero-particles";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 
 gsap.registerPlugin(useGSAP);
@@ -320,8 +319,8 @@ export default function AfterSound() {
           />
         </div>
 
-        {/* Drifting particles — dust motes in a dark room */}
-        <HeroParticles />
+        {/* Film grain — analog texture over the dark canvas */}
+        <div className="grain-overlay" aria-hidden="true" />
 
         {/* Animated EQ bars — decorative sound wave at bottom */}
         <div className="pointer-events-none absolute bottom-0 left-0 right-0 flex h-24 items-end justify-center gap-[2px] opacity-[0.12]">

@@ -60,6 +60,9 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  .grain-overlay {
+    animation: none !important;
+  }
 }
 
 /* Primary button — matches monologue.to exactly */
@@ -191,6 +194,33 @@ body {
 
 .animate-eq-bar {
   animation: eq-bar 1.5s ease-in-out infinite;
+}
+
+/* Film grain — analog noise texture over the dark canvas */
+@keyframes grain-shift {
+  0% { transform: translate(0, 0); }
+  10% { transform: translate(-2%, -3%); }
+  20% { transform: translate(-4%, 2%); }
+  30% { transform: translate(2%, -4%); }
+  40% { transform: translate(-2%, 3%); }
+  50% { transform: translate(-3%, 1%); }
+  60% { transform: translate(3%, -2%); }
+  70% { transform: translate(-1%, 4%); }
+  80% { transform: translate(4%, -1%); }
+  90% { transform: translate(-3%, -3%); }
+  100% { transform: translate(0, 0); }
+}
+
+.grain-overlay {
+  position: absolute;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain-shift 8s steps(10) infinite;
+  z-index: 1;
 }
 
 /* Slow breathing glow */
