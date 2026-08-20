@@ -12,6 +12,7 @@ import SpectrumVisualizer from "@/components/spectrum-visualizer";
 import WaveformChip from "@/components/waveform-chip";
 import AudiogramChart from "@/components/audiogram-chart";
 import EarTest from "@/components/ear-test";
+import HeroParticles from "@/components/hero-particles";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 
 gsap.registerPlugin(useGSAP);
@@ -318,6 +319,9 @@ export default function AfterSound() {
             style={{ background: "radial-gradient(circle, rgba(25,208,232,0.05) 0%, transparent 70%)" }}
           />
         </div>
+
+        {/* Drifting particles — dust motes in a dark room */}
+        <HeroParticles />
 
         {/* Animated EQ bars — decorative sound wave at bottom */}
         <div className="pointer-events-none absolute bottom-0 left-0 right-0 flex h-24 items-end justify-center gap-[2px] opacity-[0.12]">
